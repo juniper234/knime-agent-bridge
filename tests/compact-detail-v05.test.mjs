@@ -9,12 +9,19 @@ import {dispatchTool} from '../src/catalog.mjs';
 import {structuredResult,prepareResult} from '../src/mcp-result.mjs';
 import {readDetail} from '../src/details.mjs';
 
-test('MCP retains complete small structured errors without duplicating JSON in text',()=>{
+test('MCP repeats small structured errors as text for hosts that drop structuredContent',()=>{
  const value={error:{code:'NO_LIVE_SESSION',message:'Launch an explicitly selected runtime.',details:{sessions:Array.from({length:60},(_,i)=>({id:'s'+i,reason:'unavailable'.repeat(12)}))}}};
  const result=structuredResult(value,true);
  assert.deepEqual(result.structuredContent,value);
+ assert.deepEqual(JSON.parse(result.content[0].text),value);
+});
+test('an error larger than the text limit falls back to a bounded summary',()=>{
+ const value={error:{code:'NO_LIVE_SESSION',message:'Launch an explicitly selected runtime.',details:{sessions:Array.from({length:600},(_,i)=>({id:'s'+i,reason:'unavailable'.repeat(12)}))}}};
+ const result=structuredResult(value,true);
+ assert.deepEqual(result.structuredContent,value);
  assert.ok(Buffer.byteLength(result.content[0].text)<1500);
- assert.ok(!result.content[0].text.includes('s59'));
+ assert.equal(JSON.parse(result.content[0].text).error.code,'NO_LIVE_SESSION');
+ assert.ok(!result.content[0].text.includes('s599'));
 });
 test('large results have immutable complete detail with bounded Unicode chunk retrieval',async t=>{
  const runtime=await fs.mkdtemp(path.join(os.tmpdir(),'knime-v05-detail-'));t.after(()=>fs.rm(runtime,{recursive:true,force:true}));

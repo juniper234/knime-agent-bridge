@@ -22,11 +22,72 @@ public final class StageTelemetryHarness {
         assert Files.isRegularFile(file):"response absent "+id;
         return (ObjectNode)BridgeActivator.JSON.readTree(Files.readAllBytes(file));
     }
+    /** With changes off, a mutation is refused before acceptance: no receipt, no queue entry, no effect. */
+    static void writeGate()throws Exception {
+        ObjectNode health=request("health");submit(health);ObjectNode policy=(ObjectNode)response(health.path("id").asText()).path("result").path("writePolicy");
+        assert !policy.path("enabled").asBoolean(true):"writePolicy should report disabled "+policy;
+        assert policy.path("source").asText().equals("system-property"):policy.toString();
+        assert policy.path("readOperations").toString().contains("health"):policy.toString();
+        ObjectNode edit=mutation("core.reset");submit(edit);ObjectNode refused=response(edit.path("id").asText());
+        assert !refused.path("ok").asBoolean(true):refused.toString();
+        assert refused.path("error").path("code").asText().equals("WRITES_DISABLED"):refused.toString();
+        assert refused.path("error").path("details").path("nativeDispatch").asText().equals("not_started"):refused.toString();
+        assert refused.path("error").path("details").path("enableAt").asText().contains("Agent Bridge"):refused.toString();
+        assert !Files.exists(session.resolve("operations").resolve(edit.path("id").asText()+".json")):"refused mutation must not leave a receipt";
+        assert CoreAccess.effects==0&&jobs.getTaskCount()==0:"refused mutation reached the native worker";
+        ObjectNode read=request("health");submit(read);assert response(read.path("id").asText()).path("ok").asBoolean();
+        System.out.println("write gate verified");
+    }
+    static ObjectNode gateway(String method,String projectId) {
+        ObjectNode r=request("gateway.call");ObjectNode args=object().put("method",method);
+        if(projectId!=null)args.set("params",object().put("projectId",projectId));
+        r.set("args",args);return r;
+    }
+    static void refused(ObjectNode request,String reason)throws Exception {
+        submit(request);ObjectNode response=response(request.path("id").asText());
+        assert response.path("error").path("code").asText().equals("SCOPE_RESTRICTED"):reason+" "+response;
+        assert response.path("error").path("details").path("nativeDispatch").asText().equals("not_started"):response.toString();
+        assert response.path("error").path("details").path("changeAt").asText().contains("Agent Bridge"):response.toString();
+        assert !Files.exists(session.resolve("operations").resolve(request.path("id").asText()+".json")):"refused request must not leave a receipt";
+    }
+    static void allowed(ObjectNode request,String reason)throws Exception {
+        submit(request);ObjectNode response=response(request.path("id").asText());
+        assert !response.path("error").path("code").asText().equals("SCOPE_RESTRICTED"):reason+" "+response;
+    }
+    /** With open workflows only, requests that reach beyond open projects are refused before acceptance. */
+    static void scopeGate()throws Exception {
+        org.knime.gateway.impl.project.ProjectManager.OPEN.add("open-project");
+        Path runtime=Path.of(System.getProperty("knime.agent.runtime"));Files.createDirectories(runtime.resolve("exports"));
+        ObjectNode health=request("health");submit(health);ObjectNode policy=(ObjectNode)response(health.path("id").asText()).path("result").path("scopePolicy");
+        assert policy.path("openWorkflowsOnly").asBoolean(false)&&policy.path("source").asText().equals("system-property"):policy.toString();
+        ObjectNode open=request("desktop.openProject");open.set("args",object().put("spaceId","local").put("itemId","x").put("spaceProviderId","local"));
+        refused(open,"opening a saved workflow");
+        refused(gateway("SpaceService.listWorkflowGroup",null),"browsing a space");
+        refused(gateway("SpaceService.deleteItems",null),"deleting space items");
+        refused(gateway("WorkflowService.getWorkflow","closed-project"),"a project that is not open");
+        refused(gateway("WorkflowService.getWorkflow",null),"a missing projectId");
+        ObjectNode positional=request("gateway.call");positional.set("args",object().put("method","WorkflowService.getWorkflow").set("params",BridgeActivator.JSON.createArrayNode().add("closed-project")));
+        refused(positional,"a positional projectId that is not open");
+        ObjectNode outside=request("core.port.export");outside.set("args",object().put("projectId","open-project").put("nodeId","1").put("path",Files.createTempDirectory("scope-outside").resolve("t.table").toString()));
+        refused(outside,"an export outside the runtime directory");
+        ObjectNode root=request("dependency.inspect");root.set("args",object().put("projectId","open-project").set("pathChecks",BridgeActivator.JSON.createArrayNode().add(object().put("variableName","v").put("expectedRoot","/"))));
+        refused(root,"a caller-chosen root");
+        allowed(gateway("WorkflowService.getWorkflow","open-project"),"an open project");
+        ObjectNode positionalOpen=request("gateway.call");positionalOpen.set("args",object().put("method","WorkflowService.getWorkflow").set("params",BridgeActivator.JSON.createArrayNode().add("open-project")));
+        allowed(positionalOpen,"a positional open project");
+        allowed(gateway("ApplicationService.getState",null),"application state");
+        allowed(gateway("NodeRepositoryService.searchNodes",null),"the node catalogue");
+        ObjectNode inside=request("core.port.export");inside.set("args",object().put("projectId","open-project").put("nodeId","1").put("path",runtime.resolve("exports").resolve("t.table").toString()));
+        allowed(inside,"an export inside the runtime directory");
+        System.out.println("scope gate verified");
+    }
     public static void main(String[] argv)throws Exception {
         session=Path.of(argv[0]).resolve("session");for(String name:List.of("requests","responses","inflight"))Files.createDirectories(session.resolve(name));
         bridge=new BridgeActivator();field("session",session);field("ready",true);field("contexts",new ContextAccess(object()));
         field("operations",new OperationAccess(session,"fixture-session"));field("canvas",new CanvasAccess(null,null));
         jobs=new ThreadPoolExecutor(1,1,0L,TimeUnit.MILLISECONDS,new ArrayBlockingQueue<>(64));field("jobs",jobs);
+        if("false".equals(System.getProperty("knime.agent.allowWrites"))) {writeGate();jobs.shutdownNow();return;}
+        if("true".equals(System.getProperty("knime.agent.openWorkflowsOnly"))) {scopeGate();jobs.shutdownNow();return;}
         try {
             field("ready",false);ObjectNode starting=request("health");submit(starting);assert response(starting.path("id").asText()).path("result").path("status").asText().equals("starting");field("ready",true);
             ObjectNode cold=request("health");submit(cold);assert response(cold.path("id").asText()).path("ok").asBoolean();

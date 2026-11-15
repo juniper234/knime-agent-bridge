@@ -180,7 +180,17 @@ Logs and session descriptors live under `runtime`. They may contain local paths 
 
 ## Building from source
 
-The Git source includes no KNIME vendor libraries. Install compatible KNIME plus JDK 21 or newer, then set the two local paths before compiling:
+The Git source includes no KNIME vendor libraries. The bundle lives in `java`.
+
+**Release build (Windows or macOS, no KNIME install needed).** JDK 21+ and Maven 3.9.9+ build the bundle against KNIME's public 5.12.0 update site (`releng/target/knime-5.12.target`):
+
+```
+mvn -B verify
+```
+
+The JAR lands in `java/target/`. Its version qualifier is the last git commit time when the working tree is clean.
+
+**Developer build for the launcher and probe tests.** Compiles against an installed KNIME. `KNIME_HOME` defaults to the newest `/Applications/KNIME*.app` on macOS and `%LOCALAPPDATA%\Programs\KNIME` on Windows; the JDK comes from `KNIME_AGENT_JDK`, `JAVA_HOME` or `PATH`:
 
 ```powershell
 $env:KNIME_HOME = 'C:\Path\To\KNIME'
@@ -190,4 +200,4 @@ node scripts/build.mjs
 node scripts/launch.mjs
 ```
 
-The build targets Java 21 bytecode. Native acceptance tests create disposable workflows; read the verification receipt before running them. They must never target production/coursework workspaces. Python 3 is needed only for `python scripts/package.py` when creating a release archive.
+The build targets Java 21 bytecode. `npm test` runs everything that the machine supports and skips the rest with a reason: Java harness tests need a JDK and KNIME, probe tests need `node scripts/build.mjs` first, and tests against a running KNIME need `KNIME_AGENT_LIVE=1`. Native acceptance tests create disposable workflows; read the verification receipt before running them. They must never target production/coursework workspaces. Python 3 is needed only for `python scripts/package.py` when creating a release archive.

@@ -1,0 +1,1642 @@
+{
+  "schemaVersion": 1,
+  "knime": {
+    "home": "KNIME 5.12.0.app",
+    "coreVersion": "5.12.0.v202606180846"
+  },
+  "sourceFiles": 26,
+  "summary": {
+    "bundles": 19,
+    "classes": 159,
+    "members": 462
+  },
+  "bundles": [
+    {
+      "bundle": "com.fasterxml.jackson.core.jackson-annotations",
+      "version": "2.19.0",
+      "classes": [
+        {
+          "name": "com.fasterxml.jackson.annotation.JsonSubTypes",
+          "stability": "exported",
+          "members": [
+            "value()[Lcom/fasterxml/jackson/annotation/JsonSubTypes$Type;"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.annotation.JsonSubTypes$Type",
+          "stability": "exported",
+          "members": [
+            "name()Ljava/lang/String;",
+            "value()Ljava/lang/Class;"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.annotation.JsonTypeInfo",
+          "stability": "exported",
+          "members": [
+            "include()Lcom/fasterxml/jackson/annotation/JsonTypeInfo$As;",
+            "property()Ljava/lang/String;",
+            "use()Lcom/fasterxml/jackson/annotation/JsonTypeInfo$Id;",
+            "visible()Z"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.annotation.JsonTypeInfo$As",
+          "stability": "exported",
+          "members": [
+            "name()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.annotation.JsonTypeInfo$Id",
+          "stability": "exported",
+          "members": [
+            "name()Ljava/lang/String;"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "com.fasterxml.jackson.core.jackson-core",
+      "version": "2.19.0",
+      "classes": [
+        {
+          "name": "com.fasterxml.jackson.core.JsonParser",
+          "stability": "exported",
+          "members": []
+        },
+        {
+          "name": "com.fasterxml.jackson.core.JsonParser$Feature",
+          "stability": "exported",
+          "members": [
+            "field STRICT_DUPLICATE_DETECTION"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.core.JsonProcessingException",
+          "stability": "exported",
+          "members": []
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "com.fasterxml.jackson.core.jackson-databind",
+      "version": "2.19.0",
+      "classes": [
+        {
+          "name": "com.fasterxml.jackson.databind.BeanDescription",
+          "stability": "exported",
+          "members": [
+            "findProperties()Ljava/util/List;",
+            "getClassInfo()Lcom/fasterxml/jackson/databind/introspect/AnnotatedClass;"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.introspect.AnnotatedClass",
+          "stability": "exported",
+          "members": [
+            "getAnnotation(Ljava/lang/Class;)Ljava/lang/annotation/Annotation;"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.introspect.AnnotatedMember",
+          "stability": "exported",
+          "members": [
+            "getRawType()Ljava/lang/Class;",
+            "getType()Lcom/fasterxml/jackson/databind/JavaType;"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition",
+          "stability": "exported",
+          "members": [
+            "getName()Ljava/lang/String;",
+            "getPrimaryMember()Lcom/fasterxml/jackson/databind/introspect/AnnotatedMember;",
+            "isRequired()Z"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.JavaType",
+          "stability": "exported",
+          "members": [
+            "toCanonical()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.JsonNode",
+          "stability": "exported",
+          "members": [
+            "asBoolean()Z",
+            "asBoolean(Z)Z",
+            "asInt()I",
+            "asLong()J",
+            "asText()Ljava/lang/String;",
+            "asText(Ljava/lang/String;)Ljava/lang/String;",
+            "booleanValue()Z",
+            "canConvertToInt()Z",
+            "canConvertToLong()Z",
+            "deepCopy()Lcom/fasterxml/jackson/databind/JsonNode;",
+            "doubleValue()D",
+            "equals(Ljava/lang/Object;)Z",
+            "fieldNames()Ljava/util/Iterator;",
+            "get(I)Lcom/fasterxml/jackson/databind/JsonNode;",
+            "get(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;",
+            "has(Ljava/lang/String;)Z",
+            "hasNonNull(Ljava/lang/String;)Z",
+            "intValue()I",
+            "isArray()Z",
+            "isBoolean()Z",
+            "isEmpty()Z",
+            "isIntegralNumber()Z",
+            "isMissingNode()Z",
+            "isNull()Z",
+            "isNumber()Z",
+            "isObject()Z",
+            "isTextual()Z",
+            "iterator()Ljava/util/Iterator;",
+            "longValue()J",
+            "path(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;",
+            "size()I",
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.node.ArrayNode",
+          "stability": "exported",
+          "members": [
+            "add(Lcom/fasterxml/jackson/databind/JsonNode;)Lcom/fasterxml/jackson/databind/node/ArrayNode;",
+            "add(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/node/ArrayNode;",
+            "add(Z)Lcom/fasterxml/jackson/databind/node/ArrayNode;",
+            "addObject()Lcom/fasterxml/jackson/databind/node/ObjectNode;",
+            "get(I)Lcom/fasterxml/jackson/databind/JsonNode;",
+            "isEmpty()Z",
+            "iterator()Ljava/util/Iterator;",
+            "size()I"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.node.BooleanNode",
+          "stability": "exported",
+          "members": [
+            "valueOf(Z)Lcom/fasterxml/jackson/databind/node/BooleanNode;"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.node.DoubleNode",
+          "stability": "exported",
+          "members": [
+            "valueOf(D)Lcom/fasterxml/jackson/databind/node/DoubleNode;"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.node.IntNode",
+          "stability": "exported",
+          "members": [
+            "valueOf(I)Lcom/fasterxml/jackson/databind/node/IntNode;"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.node.NullNode",
+          "stability": "exported",
+          "members": [
+            "field instance"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.node.ObjectNode",
+          "stability": "exported",
+          "members": [
+            "deepCopy()Lcom/fasterxml/jackson/databind/node/ObjectNode;",
+            "equals(Ljava/lang/Object;)Z",
+            "get(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;",
+            "has(Ljava/lang/String;)Z",
+            "hasNonNull(Ljava/lang/String;)Z",
+            "path(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;",
+            "put(Ljava/lang/String;D)Lcom/fasterxml/jackson/databind/node/ObjectNode;",
+            "put(Ljava/lang/String;I)Lcom/fasterxml/jackson/databind/node/ObjectNode;",
+            "put(Ljava/lang/String;J)Lcom/fasterxml/jackson/databind/node/ObjectNode;",
+            "put(Ljava/lang/String;Ljava/lang/Double;)Lcom/fasterxml/jackson/databind/node/ObjectNode;",
+            "put(Ljava/lang/String;Ljava/lang/String;)Lcom/fasterxml/jackson/databind/node/ObjectNode;",
+            "put(Ljava/lang/String;S)Lcom/fasterxml/jackson/databind/node/ObjectNode;",
+            "put(Ljava/lang/String;Z)Lcom/fasterxml/jackson/databind/node/ObjectNode;",
+            "putArray(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/node/ArrayNode;",
+            "putNull(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/node/ObjectNode;",
+            "putObject(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/node/ObjectNode;",
+            "remove(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;",
+            "removeAll()Lcom/fasterxml/jackson/databind/node/ObjectNode;",
+            "set(Ljava/lang/String;Lcom/fasterxml/jackson/databind/JsonNode;)Lcom/fasterxml/jackson/databind/JsonNode;",
+            "setAll(Lcom/fasterxml/jackson/databind/node/ObjectNode;)Lcom/fasterxml/jackson/databind/JsonNode;",
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.node.TextNode",
+          "stability": "exported",
+          "members": [
+            "valueOf(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/node/TextNode;"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.ObjectMapper",
+          "stability": "exported",
+          "members": [
+            "<init>()V",
+            "constructType(Ljava/lang/reflect/Type;)Lcom/fasterxml/jackson/databind/JavaType;",
+            "createArrayNode()Lcom/fasterxml/jackson/databind/node/ArrayNode;",
+            "createObjectNode()Lcom/fasterxml/jackson/databind/node/ObjectNode;",
+            "enable([Lcom/fasterxml/jackson/core/JsonParser$Feature;)Lcom/fasterxml/jackson/databind/ObjectMapper;",
+            "findMixInClassFor(Ljava/lang/Class;)Ljava/lang/Class;",
+            "getSerializationConfig()Lcom/fasterxml/jackson/databind/SerializationConfig;",
+            "readTree([B)Lcom/fasterxml/jackson/databind/JsonNode;",
+            "valueToTree(Ljava/lang/Object;)Lcom/fasterxml/jackson/databind/JsonNode;",
+            "writeValueAsBytes(Ljava/lang/Object;)[B"
+          ]
+        },
+        {
+          "name": "com.fasterxml.jackson.databind.SerializationConfig",
+          "stability": "exported",
+          "members": [
+            "introspect(Lcom/fasterxml/jackson/databind/JavaType;)Lcom/fasterxml/jackson/databind/BeanDescription;"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "com.github.briandilley.jsonrpc4j",
+      "version": "1.5.2",
+      "classes": [
+        {
+          "name": "com.googlecode.jsonrpc4j.JsonRpcMethod",
+          "stability": "exported",
+          "members": [
+            "value()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "com.googlecode.jsonrpc4j.JsonRpcParam",
+          "stability": "exported",
+          "members": [
+            "value()Ljava/lang/String;"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "com.sun.jna",
+      "version": "5.17.0.v20250316-1700",
+      "classes": [
+        {
+          "name": "com.sun.jna.Pointer",
+          "stability": "exported",
+          "members": [
+            "getByteArray(JI)[B"
+          ]
+        }
+      ],
+      "reachedBy": "Import-Package"
+    },
+    {
+      "bundle": "com.sun.jna.platform",
+      "version": "5.17.0",
+      "classes": [
+        {
+          "name": "com.sun.jna.platform.win32.Kernel32",
+          "stability": "exported",
+          "members": [
+            "CloseHandle(Lcom/sun/jna/platform/win32/WinNT$HANDLE;)Z",
+            "CreateFile(Ljava/lang/String;IILcom/sun/jna/platform/win32/WinBase$SECURITY_ATTRIBUTES;IILcom/sun/jna/platform/win32/WinNT$HANDLE;)Lcom/sun/jna/platform/win32/WinNT$HANDLE;",
+            "GetFileInformationByHandleEx(Lcom/sun/jna/platform/win32/WinNT$HANDLE;ILcom/sun/jna/Pointer;Lcom/sun/jna/platform/win32/WinDef$DWORD;)Z",
+            "GetLastError()I",
+            "field INSTANCE"
+          ]
+        },
+        {
+          "name": "com.sun.jna.platform.win32.WinBase",
+          "stability": "exported",
+          "members": [
+            "field INVALID_HANDLE_VALUE"
+          ]
+        },
+        {
+          "name": "com.sun.jna.platform.win32.WinBase$FILE_ID_INFO",
+          "stability": "exported",
+          "members": [
+            "<init>()V",
+            "field VolumeSerialNumber",
+            "getPointer()Lcom/sun/jna/Pointer;",
+            "read()V",
+            "size()I"
+          ]
+        },
+        {
+          "name": "com.sun.jna.platform.win32.WinBase$SECURITY_ATTRIBUTES",
+          "stability": "exported",
+          "members": []
+        },
+        {
+          "name": "com.sun.jna.platform.win32.WinDef",
+          "stability": "exported",
+          "members": []
+        },
+        {
+          "name": "com.sun.jna.platform.win32.WinDef$DWORD",
+          "stability": "exported",
+          "members": [
+            "<init>(J)V"
+          ]
+        },
+        {
+          "name": "com.sun.jna.platform.win32.WinNT",
+          "stability": "exported",
+          "members": []
+        },
+        {
+          "name": "com.sun.jna.platform.win32.WinNT$HANDLE",
+          "stability": "exported",
+          "members": [
+            "equals(Ljava/lang/Object;)Z"
+          ]
+        }
+      ],
+      "reachedBy": "Import-Package"
+    },
+    {
+      "bundle": "org.eclipse.core.runtime",
+      "version": "3.33.100.v20250516-0931",
+      "classes": [
+        {
+          "name": "org.eclipse.core.runtime.Platform",
+          "stability": "exported",
+          "members": [
+            "getBundle(Ljava/lang/String;)Lorg/osgi/framework/Bundle;",
+            "getInstanceLocation()Lorg/eclipse/osgi/service/datalocation/Location;"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "org.eclipse.equinox.common",
+      "version": "3.20.100.v20250506-0427",
+      "classes": [
+        {
+          "name": "org.eclipse.core.runtime.FileLocator",
+          "stability": "exported",
+          "members": [
+            "getBundleFileLocation(Lorg/osgi/framework/Bundle;)Ljava/util/Optional;"
+          ]
+        },
+        {
+          "name": "org.eclipse.core.runtime.IPath",
+          "stability": "exported",
+          "members": [
+            "toPortableString()Ljava/lang/String;"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "org.eclipse.osgi",
+      "version": "3.23.100.v20250514-1759",
+      "classes": [
+        {
+          "name": "org.eclipse.osgi.service.datalocation.Location",
+          "stability": "exported",
+          "members": [
+            "getURL()Ljava/net/URL;"
+          ]
+        },
+        {
+          "name": "org.osgi.framework.Bundle",
+          "stability": "exported",
+          "members": [
+            "getLocation()Ljava/lang/String;",
+            "getVersion()Lorg/osgi/framework/Version;",
+            "loadClass(Ljava/lang/String;)Ljava/lang/Class;"
+          ]
+        },
+        {
+          "name": "org.osgi.framework.BundleActivator",
+          "stability": "exported",
+          "members": []
+        },
+        {
+          "name": "org.osgi.framework.BundleContext",
+          "stability": "exported",
+          "members": [
+            "getBundle()Lorg/osgi/framework/Bundle;"
+          ]
+        },
+        {
+          "name": "org.osgi.framework.Version",
+          "stability": "exported",
+          "members": [
+            "getMajor()I",
+            "getMicro()I",
+            "getMinor()I",
+            "toString()Ljava/lang/String;"
+          ]
+        }
+      ],
+      "reachedBy": "Import-Package"
+    },
+    {
+      "bundle": "org.eclipse.swt",
+      "version": "3.130.0.v20250528-1759",
+      "classes": [
+        {
+          "name": "org.eclipse.swt.graphics.Point",
+          "stability": "exported",
+          "members": [
+            "field x",
+            "field y"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.SWT",
+          "stability": "exported",
+          "members": []
+        },
+        {
+          "name": "org.eclipse.swt.widgets.Button",
+          "stability": "exported",
+          "members": [
+            "getEnabled()Z",
+            "getText()Ljava/lang/String;",
+            "isEnabled()Z",
+            "isVisible()Z",
+            "notifyListeners(ILorg/eclipse/swt/widgets/Event;)V"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.widgets.Composite",
+          "stability": "exported",
+          "members": [
+            "getChildren()[Lorg/eclipse/swt/widgets/Control;"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.widgets.Control",
+          "stability": "exported",
+          "members": [
+            "getSize()Lorg/eclipse/swt/graphics/Point;",
+            "isDisposed()Z",
+            "isVisible()Z"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.widgets.Display",
+          "stability": "exported",
+          "members": [
+            "asyncExec(Ljava/lang/Runnable;)V",
+            "getActiveShell()Lorg/eclipse/swt/widgets/Shell;",
+            "getCurrent()Lorg/eclipse/swt/widgets/Display;",
+            "getShells()[Lorg/eclipse/swt/widgets/Shell;",
+            "isDisposed()Z"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.widgets.Event",
+          "stability": "exported",
+          "members": [
+            "<init>()V",
+            "field widget"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.widgets.Label",
+          "stability": "exported",
+          "members": [
+            "getText()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.widgets.Link",
+          "stability": "exported",
+          "members": [
+            "getText()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.widgets.List",
+          "stability": "exported",
+          "members": [
+            "getItems()[Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.widgets.Shell",
+          "stability": "exported",
+          "members": [
+            "getEnabled()Z",
+            "getStyle()I",
+            "getText()Ljava/lang/String;",
+            "getVisible()Z",
+            "isDisposed()Z"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.widgets.Table",
+          "stability": "exported",
+          "members": [
+            "getColumnCount()I",
+            "getItems()[Lorg/eclipse/swt/widgets/TableItem;"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.widgets.TableItem",
+          "stability": "exported",
+          "members": [
+            "getText(I)Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.widgets.Text",
+          "stability": "exported",
+          "members": [
+            "getStyle()I",
+            "getText()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.widgets.Tree",
+          "stability": "exported",
+          "members": [
+            "getColumnCount()I",
+            "getItems()[Lorg/eclipse/swt/widgets/TreeItem;"
+          ]
+        },
+        {
+          "name": "org.eclipse.swt.widgets.TreeItem",
+          "stability": "exported",
+          "members": [
+            "getItems()[Lorg/eclipse/swt/widgets/TreeItem;",
+            "getParent()Lorg/eclipse/swt/widgets/Tree;",
+            "getText(I)Ljava/lang/String;"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "org.eclipse.ui.workbench",
+      "version": "3.135.100.v20250517-0909",
+      "classes": [
+        {
+          "name": "org.eclipse.ui.IWorkbench",
+          "stability": "exported",
+          "members": [
+            "getDisplay()Lorg/eclipse/swt/widgets/Display;"
+          ]
+        },
+        {
+          "name": "org.eclipse.ui.PlatformUI",
+          "stability": "exported",
+          "members": [
+            "getWorkbench()Lorg/eclipse/ui/IWorkbench;",
+            "isWorkbenchRunning()Z"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "org.knime.core",
+      "version": "5.12.0.v202606180846",
+      "classes": [
+        {
+          "name": "org.knime.core.data.BooleanValue",
+          "stability": "exported",
+          "members": [
+            "getBooleanValue()Z"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.collection.CollectionDataValue",
+          "stability": "exported",
+          "members": [
+            "iterator()Ljava/util/Iterator;"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.container.CloseableRowIterator",
+          "stability": "exported",
+          "members": [
+            "close()V",
+            "hasNext()Z",
+            "next()Lorg/knime/core/data/DataRow;"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.container.DataContainer",
+          "stability": "exported",
+          "members": [
+            "writeToStream(Lorg/knime/core/data/DataTable;Ljava/io/OutputStream;Lorg/knime/core/node/ExecutionMonitor;)V"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.container.filter.CloseableDataRowIterable",
+          "stability": "exported",
+          "members": [
+            "iterator()Lorg/knime/core/data/container/CloseableRowIterator;"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.container.filter.TableFilter",
+          "stability": "exported",
+          "members": []
+        },
+        {
+          "name": "org.knime.core.data.container.filter.TableFilter$Builder",
+          "stability": "exported",
+          "members": [
+            "<init>()V",
+            "build()Lorg/knime/core/data/container/filter/TableFilter;",
+            "withFromRowIndex(J)Lorg/knime/core/data/container/filter/TableFilter$Builder;",
+            "withMaterializeColumnIndices([I)Lorg/knime/core/data/container/filter/TableFilter$Builder;",
+            "withToRowIndex(J)Lorg/knime/core/data/container/filter/TableFilter$Builder;"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.DataCell",
+          "stability": "exported",
+          "members": [
+            "isMissing()Z",
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.DataColumnSpec",
+          "stability": "exported",
+          "members": [
+            "getName()Ljava/lang/String;",
+            "getType()Lorg/knime/core/data/DataType;"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.DataRow",
+          "stability": "exported",
+          "members": [
+            "getCell(I)Lorg/knime/core/data/DataCell;",
+            "getKey()Lorg/knime/core/data/RowKey;"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.DataTableSpec",
+          "stability": "exported",
+          "members": [
+            "findColumnIndex(Ljava/lang/String;)I",
+            "getColumnSpec(I)Lorg/knime/core/data/DataColumnSpec;",
+            "getNumColumns()I"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.DataType",
+          "stability": "exported",
+          "members": [
+            "getCellClass()Ljava/lang/Class;",
+            "getPreferredValueClass()Ljava/lang/Class;",
+            "isCollectionType()Z",
+            "isCompatible(Ljava/lang/Class;)Z",
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.DoubleValue",
+          "stability": "exported",
+          "members": [
+            "getDoubleValue()D"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.IntValue",
+          "stability": "exported",
+          "members": [
+            "getIntValue()I"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.LongValue",
+          "stability": "exported",
+          "members": [
+            "getLongValue()J"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.RowKey",
+          "stability": "exported",
+          "members": [
+            "getString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.data.StringValue",
+          "stability": "exported",
+          "members": [
+            "getStringValue()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.BufferedDataTable",
+          "stability": "exported",
+          "members": [
+            "filter(Lorg/knime/core/data/container/filter/TableFilter;)Lorg/knime/core/data/container/filter/CloseableDataRowIterable;",
+            "getDataTableSpec()Lorg/knime/core/data/DataTableSpec;",
+            "size()J"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.ExecutionMonitor",
+          "stability": "exported",
+          "members": [
+            "<init>()V"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.extension.NodeFactoryProvider",
+          "stability": "exported",
+          "members": [
+            "getInitializedNodeFactory(Lorg/knime/core/node/extension/NodeSpec;)Ljava/util/Optional;",
+            "getInstance()Lorg/knime/core/node/extension/NodeFactoryProvider;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.extension.NodeSpec",
+          "stability": "exported",
+          "members": [
+            "deprecated()Z",
+            "factory()Lorg/knime/core/node/extension/NodeSpec$Factory;",
+            "hidden()Z",
+            "metadata()Lorg/knime/core/node/extension/NodeSpec$Metadata;",
+            "ports()Lorg/knime/core/node/extension/NodeSpec$Ports;",
+            "type()Lorg/knime/core/node/NodeFactory$NodeType;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.extension.NodeSpec$Factory",
+          "stability": "exported",
+          "members": [
+            "className()Ljava/lang/String;",
+            "id()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.extension.NodeSpec$Metadata",
+          "stability": "exported",
+          "members": [
+            "categoryPath()Ljava/lang/String;",
+            "keywords()Ljava/util/List;",
+            "nodeName()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.extension.NodeSpec$Ports",
+          "stability": "exported",
+          "members": [
+            "inputPorts()Ljava/util/List;",
+            "outputPorts()Ljava/util/List;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.extension.NodeSpec$Ports$Port",
+          "stability": "exported",
+          "members": [
+            "description()Ljava/lang/String;",
+            "index()I",
+            "name()Ljava/lang/String;",
+            "type()Lorg/knime/shared/workflow/def/PortTypeDef;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.extension.NodeSpecCollectionProvider",
+          "stability": "exported",
+          "members": [
+            "getActiveNodes()Ljava/util/Map;",
+            "getInstance()Lorg/knime/core/node/extension/NodeSpecCollectionProvider;",
+            "getNodes()Ljava/util/Map;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.Node",
+          "stability": "exported",
+          "members": [
+            "getFactory()Lorg/knime/core/node/NodeFactory;",
+            "getNodeModel()Lorg/knime/core/node/NodeModel;",
+            "saveDefaultViewSettingsTo(Lorg/knime/core/node/NodeSettingsWO;)V"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.NodeFactory",
+          "stability": "exported",
+          "members": [
+            "getFactoryId()Ljava/lang/String;",
+            "getXMLDescription()Lorg/w3c/dom/Element;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.NodeFactory$NodeType",
+          "stability": "exported",
+          "members": [
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.NodeModel",
+          "stability": "exported",
+          "members": []
+        },
+        {
+          "name": "org.knime.core.node.NodeProgressMonitor",
+          "stability": "exported",
+          "members": [
+            "getMessage()Ljava/lang/String;",
+            "getProgress()Ljava/lang/Double;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.NodeSettings",
+          "stability": "exported",
+          "members": [
+            "<init>(Ljava/lang/String;)V",
+            "addNodeSettings(Lorg/knime/core/node/NodeSettings;)V",
+            "containsKey(Ljava/lang/String;)Z",
+            "getKey()Ljava/lang/String;",
+            "getNodeSettings(Ljava/lang/String;)Lorg/knime/core/node/NodeSettings;",
+            "keySet()Ljava/util/Set;",
+            "saveToXML(Ljava/io/OutputStream;)V"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.NodeSettingsRO",
+          "stability": "exported",
+          "members": []
+        },
+        {
+          "name": "org.knime.core.node.NodeSettingsWO",
+          "stability": "exported",
+          "members": []
+        },
+        {
+          "name": "org.knime.core.node.port.PortObject",
+          "stability": "exported",
+          "members": [
+            "getClass()Ljava/lang/Class;",
+            "getSpec()Lorg/knime/core/node/port/PortObjectSpec;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.port.PortObjectSpec",
+          "stability": "exported",
+          "members": [
+            "getClass()Ljava/lang/Class;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.port.PortType",
+          "stability": "exported",
+          "members": [
+            "getName()Ljava/lang/String;",
+            "getPortObjectClass()Ljava/lang/Class;",
+            "getPortObjectSpecClass()Ljava/lang/Class;",
+            "isHidden()Z",
+            "isOptional()Z"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.port.PortTypeRegistry",
+          "stability": "exported",
+          "members": [
+            "getInstance()Lorg/knime/core/node/port/PortTypeRegistry;",
+            "getObjectSerializer(Ljava/lang/Class;)Ljava/util/Optional;",
+            "getSpecSerializer(Ljava/lang/Class;)Ljava/util/Optional;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.port.PortUtil",
+          "stability": "exported",
+          "members": [
+            "writeObjectToStream(Lorg/knime/core/node/port/PortObject;Ljava/io/OutputStream;Lorg/knime/core/node/ExecutionMonitor;)V"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.Annotation",
+          "stability": "exported",
+          "members": [
+            "getContentType()Lorg/knime/shared/workflow/def/AnnotationDataDef$ContentTypeEnum;",
+            "getHeight()I",
+            "getText()Ljava/lang/String;",
+            "getWidth()I",
+            "getX()I",
+            "getY()I",
+            "save(Lorg/knime/core/node/NodeSettingsWO;)V"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.ConnectionContainer",
+          "stability": "exported",
+          "members": [
+            "getDest()Lorg/knime/core/node/workflow/NodeID;",
+            "getDestPort()I",
+            "getID()Lorg/knime/core/node/workflow/ConnectionID;",
+            "getSource()Lorg/knime/core/node/workflow/NodeID;",
+            "getSourcePort()I",
+            "getType()Lorg/knime/core/node/workflow/ConnectionContainer$ConnectionType;",
+            "getUIInfo()Lorg/knime/core/node/workflow/ConnectionUIInformation;",
+            "isFlowVariablePortConnection()Z",
+            "setUIInfo(Lorg/knime/core/node/workflow/ConnectionUIInformation;)V"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.ConnectionContainer$ConnectionType",
+          "stability": "exported",
+          "members": [
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.ConnectionUIInformation",
+          "stability": "exported",
+          "members": [
+            "builder()Lorg/knime/core/node/workflow/ConnectionUIInformation$Builder;",
+            "getAllBendpoints()[[I"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.ConnectionUIInformation$Builder",
+          "stability": "exported",
+          "members": [
+            "build()Lorg/knime/core/node/workflow/ConnectionUIInformation;",
+            "setBendpoints([[I)Lorg/knime/core/node/workflow/ConnectionUIInformation$Builder;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.FlowObjectStack",
+          "stability": "exported",
+          "members": [
+            "getAvailableFlowVariables()Ljava/util/Map;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.FlowVariable",
+          "stability": "exported",
+          "members": [
+            "getDoubleValue()D",
+            "getIntValue()I",
+            "getName()Ljava/lang/String;",
+            "getScope()Lorg/knime/core/node/workflow/FlowVariable$Scope;",
+            "getStringValue()Ljava/lang/String;",
+            "getType()Lorg/knime/core/node/workflow/FlowVariable$Type;",
+            "getVariableType()Lorg/knime/core/node/workflow/VariableType;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.FlowVariable$Scope",
+          "stability": "exported",
+          "members": [
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.FlowVariable$Type",
+          "stability": "exported",
+          "members": [
+            "field DOUBLE",
+            "field INTEGER",
+            "field STRING",
+            "ordinal()I",
+            "values()[Lorg/knime/core/node/workflow/FlowVariable$Type;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.NativeNodeContainer",
+          "stability": "exported",
+          "members": [
+            "getNode()Lorg/knime/core/node/Node;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.NodeContainer",
+          "stability": "exported",
+          "members": [
+            "getCustomName()Ljava/lang/String;",
+            "getDisplayLabel()Ljava/lang/String;",
+            "getFlowObjectStack()Lorg/knime/core/node/workflow/FlowObjectStack;",
+            "getID()Lorg/knime/core/node/workflow/NodeID;",
+            "getInPort(I)Lorg/knime/core/node/workflow/NodeInPort;",
+            "getName()Ljava/lang/String;",
+            "getNodeAnnotation()Lorg/knime/core/node/workflow/NodeAnnotation;",
+            "getNodeContainerState()Lorg/knime/core/node/workflow/NodeContainerState;",
+            "getNodeMessage()Lorg/knime/core/node/workflow/NodeMessage;",
+            "getNodeSettings()Lorg/knime/core/node/NodeSettings;",
+            "getNrInPorts()I",
+            "getNrOutPorts()I",
+            "getOutPort(I)Lorg/knime/core/node/workflow/NodeOutPort;",
+            "getParent()Lorg/knime/core/node/workflow/WorkflowManager;",
+            "getProgressMonitor()Lorg/knime/core/node/NodeProgressMonitor;",
+            "getUIInformation()Lorg/knime/core/node/workflow/NodeUIInformation;",
+            "hasDialog()Z",
+            "isDirty()Z",
+            "isInactive()Z",
+            "setUIInformation(Lorg/knime/core/node/workflow/NodeUIInformation;)V"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.NodeContainerState",
+          "stability": "exported",
+          "members": [
+            "isExecutionInProgress()Z",
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.NodeContext",
+          "stability": "exported",
+          "members": [
+            "pushContext(Lorg/knime/core/node/workflow/NodeContainer;)V",
+            "removeLastContext()V"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.NodeInPort",
+          "stability": "exported",
+          "members": [
+            "getPortType()Lorg/knime/core/node/port/PortType;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.NodeOutPort",
+          "stability": "exported",
+          "members": [
+            "getPortIndex()I",
+            "getPortObject()Lorg/knime/core/node/port/PortObject;",
+            "getPortObjectSpec()Lorg/knime/core/node/port/PortObjectSpec;",
+            "getPortSummary()Ljava/lang/String;",
+            "getPortType()Lorg/knime/core/node/port/PortType;",
+            "isInactive()Z"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.NodePort",
+          "stability": "exported",
+          "members": [
+            "getPortIndex()I",
+            "getPortName()Ljava/lang/String;",
+            "getPortType()Lorg/knime/core/node/port/PortType;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.NodeUIInformation",
+          "stability": "exported",
+          "members": [
+            "builder(Lorg/knime/core/node/workflow/NodeUIInformation;)Lorg/knime/core/node/workflow/NodeUIInformation$Builder;",
+            "getBounds()[I",
+            "getSnapToGrid()Z",
+            "hasAbsoluteCoordinates()Z",
+            "isSymbolRelative()Z"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.NodeUIInformation$Builder",
+          "stability": "exported",
+          "members": [
+            "build()Lorg/knime/core/node/workflow/NodeUIInformation;",
+            "setNodeLocation(IIII)Lorg/knime/core/node/workflow/NodeUIInformation$Builder;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.SingleNodeContainer",
+          "stability": "exported",
+          "members": [
+            "getModelSettingsUsingFlowObjectStack()Lorg/knime/core/node/NodeSettings;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.SubNodeContainer",
+          "stability": "exported",
+          "members": [
+            "getWorkflowManager()Lorg/knime/core/node/workflow/WorkflowManager;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.VariableType",
+          "stability": "exported",
+          "members": [
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.WorkflowAnnotation",
+          "stability": "exported",
+          "members": [
+            "getHeight()I",
+            "getID()Lorg/knime/core/node/workflow/WorkflowAnnotationID;",
+            "getWidth()I",
+            "getX()I",
+            "getY()I",
+            "setDimension(IIII)V"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.WorkflowAnnotationID",
+          "stability": "exported",
+          "members": [
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.WorkflowLock",
+          "stability": "exported",
+          "members": [
+            "close()V"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.WorkflowManager",
+          "stability": "exported",
+          "members": [
+            "canCancelAll()Z",
+            "canCancelNode(Lorg/knime/core/node/workflow/NodeID;)Z",
+            "canExecuteAll()Z",
+            "canExecuteNode(Lorg/knime/core/node/workflow/NodeID;)Z",
+            "canResetAll()Z",
+            "canResetNode(Lorg/knime/core/node/workflow/NodeID;)Z",
+            "cancelExecution()V",
+            "cancelExecution(Lorg/knime/core/node/workflow/NodeContainer;)V",
+            "executeAll()V",
+            "executeUpToHere([Lorg/knime/core/node/workflow/NodeID;)V",
+            "getConnectionContainers()Ljava/util/Collection;",
+            "getContext()Lorg/knime/core/node/workflow/WorkflowContext;",
+            "getID()Lorg/knime/core/node/workflow/NodeID;",
+            "getNodeContainerState()Lorg/knime/core/node/workflow/NodeContainerState;",
+            "getNodeContainers()Ljava/util/Collection;",
+            "getReentrantLockInstance()Ljava/util/concurrent/locks/ReentrantLock;",
+            "getWorkflowAnnotations()Ljava/util/Collection;",
+            "isDirty()Z",
+            "loadNodeSettings(Lorg/knime/core/node/workflow/NodeID;Lorg/knime/core/node/NodeSettingsRO;)V",
+            "lock()Lorg/knime/core/node/workflow/WorkflowLock;",
+            "resetAndConfigureAll()V",
+            "resetAndConfigureNode(Lorg/knime/core/node/workflow/NodeID;)V"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "org.knime.core.util",
+      "version": "6.12.0.v202606131335",
+      "classes": [
+        {
+          "name": "org.knime.core.node.config.base.AbstractConfigEntry",
+          "stability": "exported",
+          "members": [
+            "getKey()Ljava/lang/String;",
+            "getParent()Ljavax/swing/tree/TreeNode;",
+            "getType()Lorg/knime/core/node/config/base/ConfigEntries;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.config.base.ConfigBase",
+          "stability": "exported",
+          "members": [
+            "addBoolean(Ljava/lang/String;Z)V",
+            "addBooleanArray(Ljava/lang/String;[Z)V",
+            "addByte(Ljava/lang/String;B)V",
+            "addChar(Ljava/lang/String;C)V",
+            "addConfigBase(Ljava/lang/String;)Lorg/knime/core/node/config/base/ConfigBase;",
+            "addDouble(Ljava/lang/String;D)V",
+            "addDoubleArray(Ljava/lang/String;[D)V",
+            "addEntry(Lorg/knime/core/node/config/base/AbstractConfigEntry;)V",
+            "addFloat(Ljava/lang/String;F)V",
+            "addInt(Ljava/lang/String;I)V",
+            "addIntArray(Ljava/lang/String;[I)V",
+            "addLong(Ljava/lang/String;J)V",
+            "addLongArray(Ljava/lang/String;[J)V",
+            "addShort(Ljava/lang/String;S)V",
+            "addString(Ljava/lang/String;Ljava/lang/String;)V",
+            "addStringArray(Ljava/lang/String;[Ljava/lang/String;)V",
+            "containsKey(Ljava/lang/String;)Z",
+            "getBoolean(Ljava/lang/String;)Z",
+            "getByte(Ljava/lang/String;)B",
+            "getChar(Ljava/lang/String;)C",
+            "getDouble(Ljava/lang/String;)D",
+            "getEntry(Ljava/lang/String;)Lorg/knime/core/node/config/base/AbstractConfigEntry;",
+            "getFloat(Ljava/lang/String;)F",
+            "getInt(Ljava/lang/String;)I",
+            "getLong(Ljava/lang/String;)J",
+            "getShort(Ljava/lang/String;)S",
+            "getString(Ljava/lang/String;)Ljava/lang/String;",
+            "keySet()Ljava/util/Set;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.config.base.ConfigEntries",
+          "stability": "exported",
+          "members": [
+            "field xboolean",
+            "field xbyte",
+            "field xchar",
+            "field xdouble",
+            "field xfloat",
+            "field xint",
+            "field xlong",
+            "field xpassword",
+            "field xshort",
+            "field xstring",
+            "field xtransientstring",
+            "name()Ljava/lang/String;",
+            "ordinal()I",
+            "values()[Lorg/knime/core/node/config/base/ConfigEntries;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.config.base.ConfigPasswordEntry",
+          "stability": "exported",
+          "members": [
+            "<init>(Ljava/lang/String;Ljava/lang/String;)V",
+            "getPassword()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.config.base.ConfigTransientStringEntry",
+          "stability": "exported",
+          "members": [
+            "<init>(Ljava/lang/String;Ljava/lang/String;)V",
+            "getTransientString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.NodeID",
+          "stability": "exported",
+          "members": [
+            "equals(Ljava/lang/Object;)Z",
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.NodeMessage",
+          "stability": "exported",
+          "members": [
+            "getChildErrors()Ljava/util/Map;",
+            "getIssue()Ljava/util/Optional;",
+            "getMessage()Ljava/lang/String;",
+            "getMessageType()Lorg/knime/core/node/workflow/NodeMessage$Type;",
+            "getResolutions()Ljava/util/List;",
+            "toStringWithDetails()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.NodeMessage$Type",
+          "stability": "exported",
+          "members": [
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.WorkflowContext",
+          "stability": "exported",
+          "members": [
+            "getCurrentLocation()Ljava/io/File;",
+            "getOriginalLocation()Ljava/io/File;"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.WorkflowExporter",
+          "stability": "exported",
+          "members": [
+            "<init>(Z)V",
+            "collectResourcesToCopy(Ljava/lang/Iterable;Ljava/nio/file/Path;)Lorg/knime/core/node/workflow/WorkflowExporter$ResourcesToCopy;",
+            "exportInto(Lorg/knime/core/node/workflow/WorkflowExporter$ResourcesToCopy;Ljava/io/OutputStream;Lorg/apache/commons/lang3/function/FailableDoubleConsumer;)V"
+          ]
+        },
+        {
+          "name": "org.knime.core.node.workflow.WorkflowExporter$ResourcesToCopy",
+          "stability": "exported",
+          "members": [
+            "numBytes()J",
+            "numFiles()I",
+            "paths()Ljava/util/Map;"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "org.knime.gateway.api",
+      "version": "5.12.0.v202606171435",
+      "classes": [
+        {
+          "name": "org.knime.gateway.api.entity.AnnotationIDEnt",
+          "stability": "exported",
+          "members": [
+            "<init>(Lorg/knime/core/node/workflow/WorkflowAnnotationID;Lorg/knime/core/node/workflow/WorkflowManager;)V",
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.api.entity.ConnectionIDEnt",
+          "stability": "exported",
+          "members": [
+            "<init>(Lorg/knime/core/node/workflow/ConnectionID;Lorg/knime/core/node/workflow/WorkflowManager;)V",
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.api.entity.NodeIDEnt",
+          "stability": "exported",
+          "members": [
+            "toString()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.api.service.GatewayService",
+          "stability": "exported",
+          "members": [
+            "getClass()Ljava/lang/Class;"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.api.webui.entity.ConnectionEnt",
+          "stability": "exported",
+          "members": [
+            "getId()Lorg/knime/gateway/api/entity/ConnectionIDEnt;"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.api.webui.entity.NodeEnt",
+          "stability": "exported",
+          "members": [
+            "getId()Lorg/knime/gateway/api/entity/NodeIDEnt;",
+            "getPosition()Lorg/knime/gateway/api/webui/entity/XYEnt;"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.api.webui.entity.WorkflowAnnotationEnt",
+          "stability": "exported",
+          "members": [
+            "getId()Lorg/knime/gateway/api/entity/AnnotationIDEnt;"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.api.webui.entity.WorkflowEnt",
+          "stability": "exported",
+          "members": [
+            "getConnections()Ljava/util/Map;",
+            "getNodes()Ljava/util/Map;",
+            "getWorkflowAnnotations()Ljava/util/List;"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.api.webui.entity.XYEnt",
+          "stability": "exported",
+          "members": [
+            "getX()Ljava/lang/Integer;",
+            "getY()Ljava/lang/Integer;"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.api.webui.service.util.ListServices",
+          "stability": "exported",
+          "members": [
+            "listServiceInterfaces()Ljava/util/List;"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.api.webui.util.EntityFactory",
+          "stability": "exported",
+          "members": [
+            "field Workflow"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.api.webui.util.WorkflowBuildContext",
+          "stability": "exported",
+          "members": [
+            "builder()Lorg/knime/gateway/api/webui/util/WorkflowBuildContext$WorkflowBuildContextBuilder;"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.api.webui.util.WorkflowBuildContext$WorkflowBuildContextBuilder",
+          "stability": "exported",
+          "members": []
+        },
+        {
+          "name": "org.knime.gateway.api.webui.util.WorkflowEntityFactory",
+          "stability": "exported",
+          "members": [
+            "buildWorkflowEnt(Lorg/knime/core/node/workflow/WorkflowManager;Lorg/knime/gateway/api/webui/util/WorkflowBuildContext$WorkflowBuildContextBuilder;)Lorg/knime/gateway/api/webui/entity/WorkflowEnt;"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "org.knime.gateway.impl",
+      "version": "5.12.0.v202606171738",
+      "classes": [
+        {
+          "name": "org.knime.gateway.impl.project.Origin",
+          "stability": "implementation package",
+          "members": [
+            "isLocal()Z",
+            "itemId()Ljava/lang/String;",
+            "providerId()Ljava/lang/String;",
+            "spaceId()Ljava/lang/String;"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.impl.project.Project",
+          "stability": "implementation package",
+          "members": [
+            "getOrigin()Ljava/util/Optional;",
+            "getWorkflowManagerIfLoaded()Ljava/util/Optional;"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.impl.project.ProjectManager",
+          "stability": "implementation package",
+          "members": [
+            "getDirtyProjectsMap()Ljava/util/Map;",
+            "getInstance()Lorg/knime/gateway/impl/project/ProjectManager;",
+            "getProject(Ljava/lang/String;)Ljava/util/Optional;",
+            "isActiveProject(Ljava/lang/String;)Z"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "org.knime.gateway.impl.jsonrpc",
+      "version": "5.12.0.v202606010651",
+      "classes": [
+        {
+          "name": "org.knime.gateway.impl.webui.jsonrpc.DefaultJsonRpcRequestHandler",
+          "stability": "implementation package",
+          "members": [
+            "<init>()V",
+            "handle([B)[B"
+          ]
+        },
+        {
+          "name": "org.knime.gateway.impl.webui.jsonrpc.service.util.WrapWithJsonRpcService",
+          "stability": "implementation package",
+          "members": [
+            "wrap(Ljava/util/function/Supplier;Ljava/lang/Class;)Lorg/knime/gateway/api/service/GatewayService;"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "org.knime.gateway.json",
+      "version": "5.12.0.v202606010651",
+      "classes": [
+        {
+          "name": "org.knime.gateway.json.util.ObjectMapperUtil",
+          "stability": "exported",
+          "members": [
+            "getInstance()Lorg/knime/gateway/json/util/ObjectMapperUtil;",
+            "getObjectMapper()Lcom/fasterxml/jackson/databind/ObjectMapper;"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "org.knime.shared.workflow.def",
+      "version": "5.12.0.v202604300935",
+      "classes": [
+        {
+          "name": "org.knime.shared.workflow.def.AnnotationDataDef",
+          "stability": "exported",
+          "members": []
+        },
+        {
+          "name": "org.knime.shared.workflow.def.AnnotationDataDef$ContentTypeEnum",
+          "stability": "exported",
+          "members": []
+        },
+        {
+          "name": "org.knime.shared.workflow.def.PortTypeDef",
+          "stability": "exported",
+          "members": [
+            "getName()Ljava/lang/String;",
+            "getPortObjectClass()Ljava/lang/String;"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    },
+    {
+      "bundle": "org.knime.ui.java",
+      "version": "5.12.0.v202606150722",
+      "classes": [
+        {
+          "name": "org.knime.ui.java.api.DesktopAPI",
+          "stability": "implementation package",
+          "members": [
+            "areDependenciesInjected()Z",
+            "forEachAPIFunction(Ljava/util/function/BiConsumer;)V"
+          ]
+        }
+      ],
+      "reachedBy": "Require-Bundle"
+    }
+  ],
+  "reflective": [
+    {
+      "file": "java/src/org/knime/agent/BridgeActivator.java",
+      "line": 65,
+      "code": "Bundle core=Platform.getBundle(\"org.knime.core\");"
+    },
+    {
+      "file": "java/src/org/knime/agent/EditorViewportCapture.java",
+      "line": 19,
+      "code": "var bundle=Platform.getBundle(\"com.equo.chromium\");"
+    },
+    {
+      "file": "java/src/org/knime/agent/EditorViewportCapture.java",
+      "line": 21,
+      "code": "Class<?> api=bundle.loadClass(\"com.equo.chromium.ChromiumBrowser\");"
+    },
+    {
+      "file": "java/src/org/knime/agent/EditorViewportCapture.java",
+      "line": 28,
+      "code": "Collection<?> browsers=(Collection<?>)api.getMethod(\"getAllBrowsers\").invoke(null);"
+    },
+    {
+      "file": "java/src/org/knime/agent/EditorViewportCapture.java",
+      "line": 31,
+      "code": "String url=(String)api.getMethod(\"getUrl\").invoke(browser);"
+    },
+    {
+      "file": "java/src/org/knime/agent/EditorViewportCapture.java",
+      "line": 35,
+      "code": "Object browser=matches.get(0),component=api.getMethod(\"getUIComponent\").invoke(browser);"
+    },
+    {
+      "file": "java/src/org/knime/agent/EditorViewportCapture.java",
+      "line": 38,
+      "code": "ObjectNode identity=BridgeActivator.JSON.createObjectNode().put(\"url\",(String)api.getMethod(\"getUrl\").invoke(browser))"
+    },
+    {
+      "file": "java/src/org/knime/agent/EditorViewportCapture.java",
+      "line": 41,
+      "code": "@SuppressWarnings(\"unchecked\") CompletableFuture<byte[]> future=(CompletableFuture<byte[]>)api.getMethod(\"captureScreenshot\").invoke(browser);"
+    },
+    {
+      "file": "java/src/org/knime/agent/GatewayAccess.java",
+      "line": 134,
+      "code": "try { type=Class.forName(\"org.knime.gateway.api.webui.entity.\"+name); }"
+    },
+    {
+      "file": "java/src/org/knime/agent/GatewayAccess.java",
+      "line": 136,
+      "code": "try { type=Class.forName(\"org.knime.gateway.api.entity.\"+name); }"
+    },
+    {
+      "file": "java/src/org/knime/agent/NativePreviewCapture.java",
+      "line": 53,
+      "code": "var bundle=Platform.getBundle(\"org.knime.gateway.impl\");"
+    },
+    {
+      "file": "java/src/org/knime/agent/NativePreviewCapture.java",
+      "line": 55,
+      "code": "Class<?> type=bundle.loadClass(\"org.knime.gateway.impl.webui.preview.GenerateSVGWorkflowSaveHook\");"
+    },
+    {
+      "file": "java/src/org/knime/agent/NativePreviewCapture.java",
+      "line": 56,
+      "code": "var method=type.getDeclaredMethod(\"renderPreviewSVG\",WorkflowManager.class,Path.class);"
+    },
+    {
+      "file": "java/src/org/knime/agent/SettingsHealth.java",
+      "line": 13,
+      "code": "Method method=type.getDeclaredMethod(name,parameters);method.setAccessible(true);return method;"
+    },
+    {
+      "file": "java/src/org/knime/agent/SettingsHealth.java",
+      "line": 36,
+      "code": "invoke(method(SingleNodeContainer.class,\"saveSettings\",NodeSettingsWO.class,boolean.class,boolean.class),container,envelope,false,false);"
+    },
+    {
+      "file": "java/src/org/knime/agent/SettingsHealth.java",
+      "line": 41,
+      "code": "try {invoke(method(NodeModel.class,\"saveSettingsTo\",NodeSettingsWO.class),model,generated);}"
+    },
+    {
+      "file": "java/src/org/knime/agent/SettingsHealth.java",
+      "line": 52,
+      "code": "invoke(method(NodeModel.class,\"validateSettings\",NodeSettingsRO.class),model,envelope.getNodeSettings(\"model\"));"
+    },
+    {
+      "file": "java/src/org/knime/agent/SettingsHealth.java",
+      "line": 72,
+      "code": "invoke(method(NodeContainer.class,\"validateSettings\",NodeSettingsRO.class),container,candidate);"
+    }
+  ]
+}

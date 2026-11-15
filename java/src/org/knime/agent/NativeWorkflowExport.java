@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.*;
 import org.knime.core.node.workflow.WorkflowExporter;
 import org.knime.gateway.impl.project.ProjectManager;
-import com.sun.jna.platform.win32.*;
 
 /** Native KNIME archive of an already-saved local root. Never saves or executes a workflow. */
 final class NativeWorkflowExport {
@@ -38,8 +37,7 @@ final class NativeWorkflowExport {
             if(root.isDirty())throw new ContextAccess.Conflict("WORKFLOW_NOT_SAVED","Save and verify the root before export; export never saves it implicitly");
             if(root.getNodeContainerState().isExecutionInProgress())throw new ContextAccess.Conflict("WORKFLOW_EXECUTING","Wait for the root to settle before exporting its saved disk artifact");
             var context=root.getContext();if(context==null||context.getCurrentLocation()==null)throw new IllegalArgumentException("The project has no physical saved workflow root");
-            String configured=System.getProperty("knime.agent.runtime");
-            Path runtime=(configured==null||configured.isBlank()?Path.of(System.getProperty("user.home"),".knime-agent","runtime"):Path.of(configured)).toAbsolutePath().normalize();
+            Path runtime=RuntimeDirectory.resolve();
             ObjectNode out=exportSaved(context.getCurrentLocation().toPath(),runtime,exclude,bytes,entries);
             out.put("projectId",projectId).put("workflowId",root.getID().toString());out.set("revisions",RevisionTracker.read(root));
             return out;
@@ -120,22 +118,10 @@ final class NativeWorkflowExport {
         exact(file);BasicFileAttributes attrs=Files.readAttributes(file,BasicFileAttributes.class,LinkOption.NOFOLLOW_LINKS);
         if(attrs.isDirectory()!=directory||(!directory&&!attrs.isRegularFile()))throw new IOException("Native export requires an identifiable regular file/directory: "+file);
         Object key=attrs.fileKey();
-        if(key==null&&System.getProperty("os.name").startsWith("Windows"))key=windowsKey(file);
+        if(key==null&&WindowsFileIdentity.applies())key=WindowsFileIdentity.key(file);
         if(key==null)throw new IOException("Native export filesystem supplies no stable file identity");
         exact(file);if(!same(attrs,Files.readAttributes(file,BasicFileAttributes.class,LinkOption.NOFOLLOW_LINKS)))throw new IOException("Native export filesystem identity changed while reading: "+file);
         return new Identity(key,attrs.creationTime(),directory);
-    }
-    private static String windowsKey(Path file)throws IOException {
-        // Installed JDK Windows BasicFileAttributes has null fileKey. Read the volume and
-        // 128-bit file ID from an OS handle instead, without following a final reparse point.
-        Kernel32 kernel=Kernel32.INSTANCE;
-        WinNT.HANDLE handle=kernel.CreateFile(file.toString(),0,WinNT.FILE_SHARE_READ|WinNT.FILE_SHARE_WRITE|WinNT.FILE_SHARE_DELETE,null,WinNT.OPEN_EXISTING,WinNT.FILE_FLAG_BACKUP_SEMANTICS|WinNT.FILE_FLAG_OPEN_REPARSE_POINT,null);
-        if(WinBase.INVALID_HANDLE_VALUE.equals(handle))throw new IOException("Cannot pin native export file identity; Windows error "+kernel.GetLastError());
-        try{
-            WinBase.FILE_ID_INFO info=new WinBase.FILE_ID_INFO();
-            if(!kernel.GetFileInformationByHandleEx(handle,WinBase.FileIdInfo,info.getPointer(),new WinDef.DWORD(info.size())))throw new IOException("Cannot read native export file identity; Windows error "+kernel.GetLastError());
-            info.read();return Long.toUnsignedString(info.VolumeSerialNumber,16)+":"+HexFormat.of().formatHex(info.getPointer().getByteArray(8,16));
-        }finally{kernel.CloseHandle(handle);}
     }
     private static void check(Path file,Identity expected)throws IOException {
         if(!expected.equals(identity(file,expected.directory())))throw new IOException("Native export filesystem identity changed: "+file);

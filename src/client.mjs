@@ -1,11 +1,13 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile, readdir, realpath, rename, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import {readFileSync} from 'node:fs';
 import {resolveProfile,profileCompatibility} from './profiles.mjs';
 import {startTrace} from './trace.mjs';
+import {allowWritesFromEnv,assertWriteAllowed} from './access-policy.mjs';
 
 const SESSION_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 const OPERATION = /^[A-Za-z][A-Za-z0-9_.]*$/;
@@ -26,8 +28,14 @@ export class BridgeError extends Error {
   toJSON() { return { code: this.code, message: this.message, details: this.details }; }
 }
 
-export function defaultRuntimeDirectory() {
-  return path.resolve(process.env.KNIME_AGENT_RUNTIME || path.join(projectRoot, 'runtime'));
+/**
+ * KNIME_AGENT_RUNTIME, else ~/.knime-agent/runtime. The bridge bundle uses the same
+ * default (-Dknime.agent.runtime overrides it), so an extension-installed KNIME and
+ * this server meet without configuration. scripts/launch.mjs keeps its own
+ * <repo>/runtime; pass --runtime or KNIME_AGENT_RUNTIME when using the launcher.
+ */
+export function defaultRuntimeDirectory(env = process.env) {
+  return path.resolve(env.KNIME_AGENT_RUNTIME || path.join(os.homedir(), '.knime-agent', 'runtime'));
 }
 
 function object(value) { return value !== null && typeof value === 'object' && !Array.isArray(value); }
@@ -74,7 +82,8 @@ function unavailableReason(metadata, id, staleMs) {
 }
 
 export class BridgeClient {
-  constructor({ runtime, session, timeoutMs = 30000, pollMs = 50, staleMs = 15000, profile, profiles, profilesFile, traceDirectory, traceMaxEvents=100 } = {}) {
+  constructor({ runtime, session, timeoutMs = 30000, pollMs = 50, staleMs = 15000, profile, profiles, profilesFile, traceDirectory, traceMaxEvents=100, allowWrites = allowWritesFromEnv() } = {}) {
+    this.allowWrites = allowWrites !== false;
     this.profile=resolveProfile({profile,profiles,profilesFile,runtime,session});
     this.sourceIdentity={source:projectRoot,version:sourceVersion,sha256:sourceFingerprint};
     runtime=this.profile?.runtime??runtime??defaultRuntimeDirectory();session=this.profile?.session??session;
@@ -210,6 +219,8 @@ export class BridgeClient {
       route:{profile:this.profile?.name??null,configurationSource:this.profile?.source??'runtime/session options or KNIME_AGENT_RUNTIME/default',source:projectRoot,sourceVersion,sourceFingerprint},compatibility:profileCompatibility(this.profile,selected),
       lifecycle:this.lifecycleDiagnostics?.()??null,tracing:{enabled:!!this.traceDirectory,retainedReferences:this.traceReferences.size,maxEvents:this.traceMaxEvents},
       identity, pinnedIdentity, identityMatches: matches,
+      writes:{allowed:this.allowWrites&&selected?.writePolicy?.enabled!==false,client:{enabled:this.allowWrites,source:'KNIME_AGENT_ALLOW_WRITES'},knime:selected?.writePolicy?{enabled:selected.writePolicy.enabled,source:selected.writePolicy.source}:{enabled:null,source:'not published by this bundle'}},
+      scope:selected?.scopePolicy?{openWorkflowsOnly:selected.scopePolicy.openWorkflowsOnly,source:selected.scopePolicy.source,changeAt:selected.scopePolicy.changeAt}:{openWorkflowsOnly:null,source:'not published by this bundle'},
       readiness: { ready: selected?.alive === true, reportedStatus: selected?.reportedStatus ?? null,
         effectiveStatus: selected?.effectiveStatus ?? 'unavailable', processAlive: processAlive(selected?.pid),
         heartbeatFresh: Number.isFinite(age) && Math.abs(age) <= this.staleMs, reason: selected?.reason ?? null },
@@ -255,6 +266,7 @@ export class BridgeClient {
     const id = operationId;
     const selected = await this.selectSession(session);
     context.sessionId=selected.id;context.identity=sessionIdentity(selected);context.trace?.event('session_selected');
+    assertWriteAllowed({operation,args,session:selected,allowWrites:this.allowWrites});
     const assertBudget=()=>{if(this.observationAbort.signal.aborted)throw new BridgeError('OBSERVER_DISCONNECTED','Client transport closed; inspect the original receipt. Native outcome remains unknown.',{outcome:context.submission.state==='published'?'unknown':'not_submitted'});if(performance.now()>=context.monotonicDeadline){if(context.submission.state==='published')this.responseObservations.set(selected.id,{status:'no_response',observedAt:new Date().toISOString(),operationId:id,operation,timeoutMs});throw new BridgeError('REQUEST_TIMEOUT','Client IPC deadline expired. Inspect the original operation receipt. No replay or cancellation was performed.',{outcome:context.submission.state==='published'?'unknown':'not_submitted',stage:context.submission.state==='published'?'filesystem_poll':'selection_or_publication'});}};
     assertBudget();
     // Once used, this client stays with that process even if another instance

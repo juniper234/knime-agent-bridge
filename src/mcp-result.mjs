@@ -2,6 +2,8 @@ import {BridgeError} from './client.mjs';
 import {storeDetail} from './details.mjs';
 export const IMAGES=Symbol.for('knime.agent.images');
 const EMIT=Symbol.for('knime.agent.image-emission');
+/** Largest JSON repeated in the text block; larger results go through knime_detail. */
+export const TEXT_LIMIT=32*1024;
 const PNG=Buffer.from([137,80,78,71,13,10,26,10]);
 export function withImages(metadata,images,onEmit) {
   const result={...metadata};
@@ -9,17 +11,24 @@ export function withImages(metadata,images,onEmit) {
   if(onEmit)Object.defineProperty(result,EMIT,{value:onEmit});
   return result;
 }
+// Refused before acceptance: no receipt exists, so reconciliation has nothing to find.
+function neverDispatched(error){return error?.details?.nativeDispatch==='not_started'||error?.details?.outcome==='not_submitted';}
 export function structuredResult(value,isError=false) {
   const structuredContent=value!==null&&typeof value==='object'&&!Array.isArray(value)?{...value}:{result:value};
   // Structured content carries the complete payload once. Human-readable text
   // is a bounded summary, avoiding repeated stale-session/settings/table JSON.
   const summary=isError?{error:{code:value?.error?.code??'UNKNOWN',message:String(value?.error?.message??'Operation failed.').slice(0,600)},
     ...(value?.error?.details?.operationId?{operationId:value.error.details.operationId}:{}),
-    ...(value?.error?.details?.reconciliation?{nextStep:'Reconcile the original UUID with knime_operation; do not resubmit.'}:{}),detail:'See structuredContent.'}
+    ...(neverDispatched(value?.error)?{nextStep:value?.error?.code==='WRITES_DISABLED'?'Nothing was changed. Tell the user how to allow changes, or continue with read-only tools.':value?.error?.code==='SCOPE_RESTRICTED'?'Nothing was changed. This KNIME only lets agents use workflows that are open; ask the user to open the workflow, or continue with the open ones.':'Nothing was sent to KNIME; it is safe to correct the request and try again.'}
+      :value?.error?.details?.reconciliation?{nextStep:'Reconcile the original UUID with knime_operation; do not resubmit.'}:{}),detail:'See structuredContent.'}
    :Object.fromEntries(['status','state','completed','sessionId','operationId','evidenceId','tableIdentity','totalRows','rowCount','detailAvailable','detail','nextCall'].filter(k=>Object.hasOwn(structuredContent,k)).map(k=>[k,structuredContent[k]]));
   if(!isError)summary.detailSource='structuredContent';
-  let summaryText=JSON.stringify(summary);
-  if(Buffer.byteLength(summaryText)>2000)summaryText=JSON.stringify({status:structuredContent.status??structuredContent.state??'returned',detailSource:'structuredContent'});
+  // MCP asks servers that return structuredContent to repeat it as JSON text, and some
+  // hosts (relays, older clients) only forward text. Within TEXT_LIMIT the text is the
+  // full payload; larger payloads were already replaced by a knime_detail reference.
+  const full=JSON.stringify(isError&&summary.nextStep?{...structuredContent,nextStep:summary.nextStep}:structuredContent);
+  let summaryText=Buffer.byteLength(full)<=TEXT_LIMIT?full:JSON.stringify(summary);
+  if(Buffer.byteLength(summaryText)>TEXT_LIMIT)summaryText=JSON.stringify({status:structuredContent.status??structuredContent.state??'returned',detailSource:'structuredContent'});
   const content=[{type:'text',text:summaryText}];
   let total=Buffer.byteLength(content[0].text);
   for(const image of value?.[IMAGES]??[]) {
@@ -39,7 +48,7 @@ export function structuredResult(value,isError=false) {
 export async function prepareResult(client,value,{isError=false,resultMode='compact'}={}) {
  if(!['compact','full'].includes(resultMode))throw new BridgeError('INVALID_ARGUMENT','resultMode must be compact or full.');
  const text=JSON.stringify(value);
- if(resultMode==='full'||Buffer.byteLength(text??'null')<=128*1024)return structuredResult(value,isError);
+ if(resultMode==='full'||Buffer.byteLength(text??'null')<=TEXT_LIMIT)return structuredResult(value,isError);
  let detail;
  try{detail=await storeDetail(client,value);}
  catch(error){

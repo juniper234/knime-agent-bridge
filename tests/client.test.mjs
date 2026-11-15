@@ -225,3 +225,24 @@ test('CLI rejects mixed argument formats and invalid JSON without creating a req
   }
   assert.equal(f.requests.length, 0);
 });
+
+test('client write switch refuses a mutation without queueing a request and still allows reads', async t => {
+  const writePolicy = { enabled: true, source: 'preference', readOperations: ['core.snapshot'], gatewayReadMethods: [] };
+  const f = await fixture(t, { overrides: { writePolicy }, respond: request => ({ id: request.id, ok: true, result: { read: true } }) });
+  const client = new BridgeClient({ runtime: f.runtime, pollMs: 5, timeoutMs: 500, allowWrites: false });
+  await assert.rejects(client.call('core.settings.patch', { projectId: 'p', nodeId: 'n', patches: [] }), error => error.code === 'WRITES_DISABLED' && error.details.nativeDispatch === 'not_started');
+  assert.deepEqual(await client.call('core.snapshot', {}), { read: true });
+  assert.deepEqual(f.requests.map(r => r.operation), ['core.snapshot']);
+  const connection = await client.connectionDiagnostics();
+  assert.deepEqual(connection.writes, { allowed: false, client: { enabled: false, source: 'KNIME_AGENT_ALLOW_WRITES' }, knime: { enabled: true, source: 'preference' } });
+});
+
+test('connection diagnostics report the KNIME open-workflows-only scope', async t => {
+  const scopePolicy = { openWorkflowsOnly: true, source: 'preference', changeAt: 'KNIME > Preferences > KNIME > Agent Bridge', blockedOperations: ['desktop.openProject'] };
+  const f = await fixture(t, { overrides: { scopePolicy }, respond: request => ({ id: request.id, ok: true, result: {} }) });
+  const scoped = await new BridgeClient({ runtime: f.runtime, pollMs: 5, timeoutMs: 500 }).connectionDiagnostics();
+  assert.deepEqual(scoped.scope, { openWorkflowsOnly: true, source: 'preference', changeAt: 'KNIME > Preferences > KNIME > Agent Bridge' });
+  const older = await fixture(t, { respond: request => ({ id: request.id, ok: true, result: {} }) });
+  const unknown = await new BridgeClient({ runtime: older.runtime, pollMs: 5, timeoutMs: 500 }).connectionDiagnostics();
+  assert.deepEqual(unknown.scope, { openWorkflowsOnly: null, source: 'not published by this bundle' });
+});

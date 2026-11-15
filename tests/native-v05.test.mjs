@@ -47,7 +47,7 @@ test('frozen v0.5 native MCP full cohort and copied executed-parent scalar path 
   const add=async(projectId,factory,x)=>{const found=await raw('knime_nodes',{query:factory,limit:10});assert.ok(found.nodes.some(n=>n.factoryId===factory));return (await command(projectId,{kind:'add_node',nodeFactory:{className:factory},position:{x,y:160}})).newNodeId;};
   const dependencies=(projectId,nodeId)=>raw('knime_dependencies',{projectId,nodeId,variableNames:['fixture_path','fixture_run'],pathChecks:[{variableName:'fixture_path'}],includeEffectiveSettings:false});
   try {
-    const listing=await client.listTools();assert.equal(listing.tools.length,25);receipt.tools=listing.tools.map(t=>t.name);await fs.writeFile(path.join(evidenceDirectory,'tools.json'),JSON.stringify(listing,null,2));
+    const listing=await client.listTools();assert.equal(listing.tools.length,26);receipt.tools=listing.tools.map(t=>t.name);await fs.writeFile(path.join(evidenceDirectory,'tools.json'),JSON.stringify(listing,null,2));
     const connection=await raw('knime_connection',{session:expectedSession,detail:true}),health=await raw('knime_health',{session:expectedSession});
     assert.equal(health.id,expectedSession);assert.equal(health.pid,expectedPid);assert.equal(health.startedAt,pinnedDescriptor.startedAt);assert.equal(health.bridgeVersion,'0.5.0');assert.equal(health.bundleFingerprint,expectedBundle);
     const workspace=fileURLToPath(health.workspace);assert.match(workspace,/knime-agent-bridge.*runtime.*workspace-w2-v04-/,'Native fixture requires owned beta workspace');assert.equal(path.dirname(path.resolve(workspace)),await fs.realpath(runtime));assert.equal(health.workspace,pinnedDescriptor.workspace);assert.equal(health.descriptorOnly,true);

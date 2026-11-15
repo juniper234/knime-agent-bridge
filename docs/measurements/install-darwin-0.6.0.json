@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-31T15:42:32.858Z",
+  "platform": "darwin-arm64",
+  "os": "27.0.0",
+  "node": "v26.10.0",
+  "bridgeVersion": "0.6.0",
+  "runtime": "/Users/jan/.knime-agent/runtime",
+  "workspace": "/Users/jan/xworkspace/knime-agent-bridge/runtime/workspace-m5",
+  "session": {
+    "id": "87de6640-619a-4674-b37d-051162502ae9",
+    "pid": 10515,
+    "knimeVersion": "5.12.0.v202606180846",
+    "bundleFingerprint": "6d171c30aabcbefc6c3c4cf1fc1c870923a4c664393c001f5c8d463ad69b8e9c",
+    "bridgeVersion": "0.6.0"
+  },
+  "steps": [
+    {
+      "name": "connection reports the installed bridge and both write switches",
+      "kind": "functional",
+      "status": "pass",
+      "ms": 68,
+      "detail": {
+        "tools": 26,
+        "knimeVersion": "5.12.0.v202606180846",
+        "writePolicy": {
+          "enabled": true,
+          "source": "preference"
+        }
+      }
+    },
+    {
+      "name": "create and open a synthetic workflow",
+      "kind": "functional",
+      "status": "pass",
+      "ms": 839,
+      "detail": {
+        "itemName": "M5 Install Check 1793461353068",
+        "projectId": "M5 Install Check 1793461353068_acfa94f8-3392-4625-b4ea-84d504b5d35f"
+      }
+    },
+    {
+      "name": "add, connect and inspect nodes",
+      "kind": "functional",
+      "status": "pass",
+      "ms": 610,
+      "detail": {
+        "nodes": [
+          "Table Creator",
+          "Column Filter"
+        ]
+      }
+    },
+    {
+      "name": "preview then apply typed settings, with clean validation",
+      "kind": "functional",
+      "status": "pass",
+      "ms": 490,
+      "detail": {
+        "previewChangedFields": 3,
+        "validation": [
+          [
+            "Table Creator",
+            "passed",
+            true
+          ],
+          [
+            "Column Filter",
+            "passed",
+            true
+          ]
+        ]
+      }
+    },
+    {
+      "name": "execute and wait; no node messages",
+      "kind": "functional",
+      "status": "pass",
+      "ms": 699,
+      "detail": {
+        "knimeWait": "{\"status\":\"settled\",\"completed\":true,\"condition\":\"execution\",\"sessionId\":\"87de6640-619a-4674-b37d-051162502ae9\",\"attempts\":1,\"elapsedMs\":107,\"observation\":{\"id\":\"4:2\",\"gatewayId\":\"root:2\",\"name\":\"Column Filter\",\"label\":\"4:2 - Column Filter\",\"customName\":null,\"state\":\"EXECUTED\",\"dirty\":true,\"inactive"
+      }
+    },
+    {
+      "name": "read and verify the output table against independent expectations",
+      "kind": "functional",
+      "status": "pass",
+      "ms": 223,
+      "detail": {
+        "rows": 3,
+        "verification": "passed"
+      }
+    },
+    {
+      "name": "canvas overview image (native SVG rendered locally)",
+      "kind": "visual",
+      "status": "pass",
+      "ms": 1245,
+      "detail": {
+        "images": [
+          "runtime/m5-evidence/overview-0.png"
+        ],
+        "renderer": "Google Chrome / Playwright",
+        "reviewed": false
+      }
+    },
+    {
+      "name": "live editor viewport image",
+      "kind": "visual",
+      "status": "pass",
+      "ms": 541,
+      "detail": {
+        "images": [
+          "runtime/m5-evidence/viewport-0.png"
+        ],
+        "reviewed": false
+      }
+    },
+    {
+      "name": "selection is readable from the UI",
+      "kind": "functional",
+      "status": "pass",
+      "ms": 58,
+      "detail": {
+        "nodeIds": []
+      }
+    },
+    {
+      "name": "client read-only switch refuses a change and leaves the graph unchanged",
+      "kind": "functional",
+      "status": "pass",
+      "ms": 440
+    },
+    {
+      "name": "save, export, close and reopen; settings and data persist",
+      "kind": "persistence",
+      "status": "pass",
+      "ms": 1346,
+      "detail": {
+        "knimeWaitSaved": "{\"status\":\"settled\",\"completed\":true,\"condition\":\"saved\",\"sessionId\":\"87de6640-619a-4674-b37d-051162502ae9\",\"attempts\":1,\"elapsedMs\":107,\"observation\":{\"id\":\"4\",\"gatewayId\":\"root\",\"name\":\"M5 Install Check 1793461353068\",\"label\":\"4 - M5 Install Check 1793461353068\",\"customName\":null,\"state\":\"EXECUTED",
+        "export": {
+          "entries": 17,
+          "bytes": 54274,
+          "sha256": "6080b718b37a4d61c92c9f2bf67d951fd134d260db77572c69f2400f112ea4fe"
+        },
+        "reopenedProjectId": "M5 Install Check 1793461353068_01748529-96ed-431d-9104-5075ef986e6a"
+      }
+    }
+  ],
+  "evidence": {
+    "functional": [
+      "connection reports the installed bridge and both write switches",
+      "create and open a synthetic workflow",
+      "add, connect and inspect nodes",
+      "preview then apply typed settings, with clean validation",
+      "execute and wait; no node messages",
+      "read and verify the output table against independent expectations",
+      "selection is readable from the UI",
+      "client read-only switch refuses a change and leaves the graph unchanged"
+    ],
+    "visual": [
+      "canvas overview image (native SVG rendered locally)",
+      "live editor viewport image"
+    ],
+    "persistence": [
+      "save, export, close and reopen; settings and data persist"
+    ]
+  },
+  "notCovered": [
+    "Images were generated, not reviewed; review them before claiming visual quality.",
+    "Claude Desktop UI toggles are checked by hand, not by this script.",
+    "Selection by mouse click is not driven here (no DevTools port on an installed KNIME).",
+    "UI responsiveness is not measured."
+  ],
+  "finishedAt": "2026-10-31T15:42:39.635Z",
+  "summary": {
+    "pass": 11,
+    "fail": 0
+  }
+}

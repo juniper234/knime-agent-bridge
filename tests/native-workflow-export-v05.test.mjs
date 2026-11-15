@@ -1,4 +1,6 @@
 import test from 'node:test';
+import {needsBuild} from './helpers/requirements.mjs';
+import {javaTool,findKnimeHome} from '../scripts/lib/java-toolchain.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -8,15 +10,15 @@ import {fileURLToPath} from 'node:url';
 
 async function jars(directory){const out=[];for(const e of await fs.readdir(directory,{withFileTypes:true})){const p=path.join(directory,e.name);if(e.isDirectory())out.push(...await jars(p));else if(p.endsWith('.jar'))out.push(p);}return out;}
 const quote=s=>'"'+s.replaceAll('\\','/')+'"';
-test('actual installed native exporter obeys production bounds without launching KNIME',{timeout:60000},async()=>{
- const plugins=path.join(process.env.KNIME_HOME??path.join(process.env.LOCALAPPDATA,'Programs','KNIME'),'plugins'),scratch=path.resolve('build','native-export-harness-'+randomUUID());await fs.mkdir(scratch,{recursive:true});
+test('actual installed native exporter obeys production bounds without launching KNIME',{skip:needsBuild,timeout:60000},async()=>{
+ const plugins=path.join(findKnimeHome(),'plugins'),scratch=path.resolve('build','native-export-harness-'+randomUUID());await fs.mkdir(scratch,{recursive:true});
  const unpacked=(await fs.readdir(plugins,{withFileTypes:true})).filter(e=>e.isDirectory()&&e.name.startsWith('com.sun.jna_')).map(e=>path.join(plugins,e.name));
- const cp=[scratch,path.resolve('build/classes'),...unpacked,...await jars(plugins)].join(path.delimiter),jdk=process.env.KNIME_AGENT_JDK??'C:/Program Files/Java/jdk-24';
+ const cp=[scratch,path.resolve('build/classes'),...unpacked,...await jars(plugins)].join(path.delimiter);
  const helper=path.resolve('java/src/org/knime/agent/NativeWorkflowExport.java'),sources=[path.resolve('tests/java/NativeWorkflowExportHarness.java')];try{await fs.access(helper);sources.push(helper);}catch(e){if(e.code!=='ENOENT')throw e;}
  const compile=path.join(scratch,'compile.args');await fs.writeFile(compile,['--release','21','-encoding','UTF-8','-cp',quote(cp),'-d',quote(scratch),...sources.map(quote)].join('\n'));
- const compiled=spawnSync(path.join(jdk,'bin/javac.exe'),['@'+compile],{encoding:'utf8',windowsHide:true,timeout:30000});assert.equal(compiled.status,0,compiled.stdout+compiled.stderr);
+ const compiled=spawnSync(javaTool('javac'),['@'+compile],{encoding:'utf8',windowsHide:true,timeout:30000});assert.equal(compiled.status,0,compiled.stdout+compiled.stderr);
  const run=path.join(scratch,'run.args');await fs.writeFile(run,['-ea','-cp',quote(cp),'org.knime.agent.NativeWorkflowExportHarness',quote(scratch)].join('\n'));
- const executed=spawnSync(path.join(jdk,'bin/java.exe'),['@'+run],{encoding:'utf8',windowsHide:true,timeout:30000});await fs.writeFile(path.join(scratch,'execution.txt'),executed.stdout+executed.stderr);assert.equal(executed.status,0,executed.stdout+executed.stderr);assert.match(executed.stdout,/actual installed exporter/);
+ const executed=spawnSync(javaTool('java'),['@'+run],{encoding:'utf8',windowsHide:true,timeout:30000});await fs.writeFile(path.join(scratch,'execution.txt'),executed.stdout+executed.stderr);assert.equal(executed.status,0,executed.stdout+executed.stderr);assert.match(executed.stdout,/actual installed exporter/);
 });
 
 test('fresh native bridge exports only its saved isolated Unicode workflow',{skip:process.env.KNIME_V05_NATIVE!=='1',timeout:180000},async()=>{

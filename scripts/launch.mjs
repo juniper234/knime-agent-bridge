@@ -5,6 +5,7 @@ import { spawn } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import { randomUUID } from 'node:crypto';
 import { BridgeClient } from '../src/client.mjs';
+import { BUNDLE_ID, findKnimeHome } from './lib/java-toolchain.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -103,8 +104,23 @@ export async function seedModernUi(config) {
   await fs.writeFile(file,preferences);
 }
 
-export async function launchKnime({ argv = process.argv.slice(2), env = process.env, spawnProcess = spawn } = {}) {
-  const knime = env.KNIME_HOME || path.join(env.LOCALAPPDATA, 'Programs', 'KNIME');
+// KNIME_HOME is the folder holding knime.ini, plugins and configuration. On macOS that is
+// KNIME.app/Contents/Eclipse and the native launcher sits next to it in Contents/MacOS.
+export function knimeExecutable(knime, platform = process.platform) {
+  if (platform === 'win32') return path.join(knime, 'knime.exe');
+  if (platform === 'darwin') return path.resolve(knime, '..', 'MacOS', 'knime');
+  return path.join(knime, 'knime');
+}
+
+// KNIME_AGENT_LAUNCH_VMARGS: extra JVM arguments for developer launches, separated by spaces
+// (for example -Dchromium.remote_debugging_port=9222 to inspect the UI with DevTools).
+export function extraVmArgs(env = process.env) {
+  return (env.KNIME_AGENT_LAUNCH_VMARGS ?? '').split(/\s+/).filter(Boolean);
+}
+
+export async function launchKnime({ argv = process.argv.slice(2), env = process.env, spawnProcess = spawn, platform = process.platform } = {}) {
+  const knime = findKnimeHome(env);
+  if (!knime) throw new Error('No KNIME installation found. Set KNIME_HOME to the folder that contains knime.ini.');
   const runtime = path.resolve(env.KNIME_AGENT_RUNTIME || path.join(root, 'runtime'));
   const workspace = parseWorkspace(argv, runtime);
   const release = await acquireRuntimeLock(runtime);
@@ -117,22 +133,25 @@ export async function launchKnime({ argv = process.argv.slice(2), env = process.
     await fs.mkdir(workspace, { recursive: true });
     const originalConfig = await fs.readFile(path.join(knime, 'configuration', 'config.ini'), 'utf8');
     const originalBundles = await fs.readFile(path.join(knime, 'configuration', 'org.eclipse.equinox.simpleconfigurator', 'bundles.info'), 'utf8');
-    const lines = originalBundles.split(/\r?\n/).filter(Boolean).map(line => {
+    // An installed copy of the extension would clash with the developer JAR (singleton bundle).
+    const lines = originalBundles.split(/\r?\n/).filter(Boolean).filter(line => !line.startsWith(BUNDLE_ID + ',')).map(line => {
       if (line.startsWith('#')) return line;
       const fields = line.split(',');
       if (!fields[2].startsWith('file:')) fields[2] = pathToFileURL(path.resolve(knime, fields[2])).href;
       return fields.join(',');
     });
     const version=JSON.parse(await fs.readFile(path.join(root,'package.json'),'utf8')).version;
-    let bundleName='org.knime.agent.bridge_'+version+'.jar';
+    let bundleName=BUNDLE_ID+'_'+version+'.jar',bundleVersion=version;
     try {
       const latest=JSON.parse(await fs.readFile(path.join(root,'artifacts','latest.json'),'utf8'));
-      if(!/^org\.knime\.agent\.bridge_[0-9]+\.[0-9]+\.[0-9]+-[a-f0-9]{12}\.jar$/.test(latest.bundle)||!latest.bundle.startsWith('org.knime.agent.bridge_'+version+'-'))throw new Error('Invalid built bundle name in artifacts/latest.json');
+      if(!new RegExp('^'+BUNDLE_ID.replaceAll('.','\\.')+'_[0-9]+\\.[0-9]+\\.[0-9]+-[a-f0-9]{12}\\.jar$').test(latest.bundle)||!latest.bundle.startsWith(BUNDLE_ID+'_'+version+'-'))throw new Error('Invalid built bundle name in artifacts/latest.json');
       bundleName=latest.bundle;
+      // scripts/build.mjs stamps the manifest qualifier as dev<revision>; bundles.info must name the same version.
+      bundleVersion=version+'.dev'+latest.bundle.slice(-16,-4);
     } catch(error) {if(error.code!=='ENOENT')throw error;}
     const bundle = path.join(root, 'artifacts', bundleName);
     await fs.access(bundle);
-    lines.push(['org.knime.agent.bridge', version, pathToFileURL(bundle).href, '4', 'true'].join(','));
+    lines.push([BUNDLE_ID, bundleVersion, pathToFileURL(bundle).href, '4', 'true'].join(','));
     await fs.writeFile(path.join(config, 'org.eclipse.equinox.simpleconfigurator', 'bundles.info'), lines.join('\n') + '\n');
     // p2 does not URL-decode this location. Retain the config-relative form and
     // private profile copy so paths containing spaces remain valid.
@@ -152,8 +171,8 @@ export async function launchKnime({ argv = process.argv.slice(2), env = process.
     const log = await fs.open(logPath, 'a');
     let child;
     try {
-      const launchArgs = ['-clean', '-nosplash', '-consoleLog', '-configuration', config, '-data', workspace, '-vmargs', ...vmArgs, '-Dknime.agent.runtime=' + runtime];
-      child = spawnProcess(path.join(knime, 'knime.exe'), launchArgs, { cwd: knime, detached: true, windowsHide: true, stdio: ['ignore', log.fd, log.fd] });
+      const launchArgs = ['-clean', '-nosplash', '-consoleLog', '-configuration', config, '-data', workspace, '-vmargs', ...vmArgs, '-Dknime.agent.runtime=' + runtime, '-Dknime.agent.allowWrites=true', '-Dknime.agent.openWorkflowsOnly=false', ...extraVmArgs(env)];
+      child = spawnProcess(knimeExecutable(knime, platform), launchArgs, { cwd: knime, detached: true, windowsHide: true, stdio: ['ignore', log.fd, log.fd] });
       await new Promise((resolve, reject) => {
         child.once('error', reject);
         child.once('spawn', resolve);

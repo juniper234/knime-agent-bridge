@@ -1,0 +1,4 @@
+# Start the bridge as soon as KNIME starts after installation; nothing in KNIME loads
+# this bundle's classes on its own. Uninstall clears the flag again.
+instructions.configure=org.eclipse.equinox.p2.touchpoint.eclipse.markStarted(started:true);
+instructions.unconfigure=org.eclipse.equinox.p2.touchpoint.eclipse.markStarted(started:false);

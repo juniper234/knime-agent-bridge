@@ -1,6 +1,6 @@
 {
   "name": "knime-agent-bridge",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "description": "Local live KNIME agent bridge: shared IPC client, CLI and MCP server",
@@ -14,11 +14,16 @@
     "test": "node --test --test-concurrency=1 tests/*.test.mjs",
     "test:adapter": "node --test tests/client.test.mjs tests/mcp.test.mjs tests/launcher.test.mjs tests/launcher-modern.test.mjs",
     "test:beta": "node scripts/verify-beta.mjs",
-    "mcp": "node src/server.mjs"
+    "mcp": "node src/server.mjs",
+    "build:mcpb": "node scripts/build-mcpb.mjs",
+    "build:installer": "node scripts/build-installer.mjs"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.30.1",
+    "@modelcontextprotocol/sdk": "1.32.2",
     "playwright-core": "1.63.0",
     "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@anthropic-ai/mcpb": "2.1.2"
   }
 }

@@ -35,6 +35,8 @@ Named parameters are recommended. Positional arrays are also accepted in the ord
 
 ## Create and open a workflow
 
+This needs **Only allow AI agents to use workflows that are open in KNIME** turned off (Preferences > KNIME > Agent Bridge). With it on, which is the default, `SpaceService` methods and `desktop.openProject` are refused with `SCOPE_RESTRICTED`, and every other gateway method must name an open `projectId`. The project-free methods that stay available are listed in the session's `scopePolicy.projectFreeGatewayMethods` (application state, the node catalogue and node descriptions).
+
 Local workspace IDs are `spaceProviderId: "local"` and `spaceId: "local"`. Its root directory item ID is the literal string `"root"`, not `/`. Other items have opaque IDs: use IDs returned by KNIME, not filesystem paths or names.
 
 ```js

@@ -6,7 +6,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { launchKnime } from '../scripts/launch.mjs';
+import { knimeExecutable, launchKnime } from '../scripts/launch.mjs';
 
 const script = fileURLToPath(new URL('../scripts/launch.mjs', import.meta.url));
 const preferencePath = workspace => path.join(workspace, '.metadata', '.plugins', 'org.eclipse.core.runtime', '.settings', 'org.knime.workbench.core.prefs');
@@ -146,9 +146,11 @@ test('successful spawn holds the lock until its pid is published, then later lau
   let signalSpawn, pendingChild;
   const reachedSpawn = new Promise(resolve => { signalSpawn = resolve; });
   const pendingLaunch = launchKnime({
-    argv: [], env: { KNIME_HOME: f.knime, KNIME_AGENT_RUNTIME: f.runtime },
+    argv: [], env: { KNIME_HOME: f.knime, KNIME_AGENT_RUNTIME: f.runtime }, platform: 'win32',
     spawnProcess(executable, args, options) {
       assert.equal(executable, path.join(f.knime, 'knime.exe'));
+      assert.ok(args.includes('-Dknime.agent.allowWrites=true'));
+      assert.ok(args.includes('-Dknime.agent.openWorkflowsOnly=false'), 'test KNIME creates synthetic workflows through SpaceService');
       assert.equal(args[args.indexOf('-data') + 1], f.workspace);
       assert.equal(options.windowsHide, true);
       pendingChild = new EventEmitter();
@@ -194,4 +196,28 @@ test('failure to record an already started process retains the guard against ano
   assert.equal(result.code, 1);
   assert.match(result.stderr, /launch preparation.*locked/i);
   assert.deepEqual((await fs.readdir(f.runtime)).filter(name => name.endsWith('.tmp')), []);
+});
+
+test('native launcher path follows the platform layout', () => {
+  assert.equal(knimeExecutable('/Applications/KNIME 5.12.0.app/Contents/Eclipse', 'darwin'), '/Applications/KNIME 5.12.0.app/Contents/MacOS/knime');
+  assert.equal(knimeExecutable('/opt/knime', 'linux'), '/opt/knime/knime');
+  assert.match(knimeExecutable('C:\\KNIME', 'win32'), /knime\.exe$/);
+});
+
+test('an installed copy of the extension is dropped so only the developer JAR loads', async t => {
+  const f = await fixture(t);
+  await fakeInstallation(f);
+  const info = path.join(f.knime, 'configuration', 'org.eclipse.equinox.simpleconfigurator', 'bundles.info');
+  await fs.writeFile(info, '#version=1\norg.knime.core,5.12.0,plugins/org.knime.core.jar,4,false\nio.github.juniper234.knime.agentbridge,0.6.0.202610311350,plugins/io.github.juniper234.knime.agentbridge_0.6.0.202610311350.jar,4,true\n');
+  let seenArgs;
+  await launchKnime({
+    argv: [], env: { KNIME_HOME: f.knime, KNIME_AGENT_RUNTIME: f.runtime, KNIME_AGENT_LAUNCH_VMARGS: ' -Dchromium.remote_debugging_port=9222 ' }, platform: 'win32',
+    spawnProcess(executable, args) { seenArgs = args; const child = new EventEmitter(); child.pid = process.pid; child.unref = () => {}; queueMicrotask(() => child.emit('spawn')); return child; },
+  });
+  const written = await fs.readFile(path.join(f.runtime, 'configuration', 'org.eclipse.equinox.simpleconfigurator', 'bundles.info'), 'utf8');
+  const bridges = written.split('\n').filter(line => line.startsWith('io.github.juniper234.knime.agentbridge,'));
+  assert.equal(bridges.length, 1);
+  assert.doesNotMatch(bridges[0], /202610311350/);
+  assert.match(written, /^org\.knime\.core,/m);
+  assert.equal(seenArgs.at(-1), '-Dchromium.remote_debugging_port=9222');
 });

@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {needsLive} from './helpers/requirements.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -7,7 +8,7 @@ import {nativeCall} from './native-health.test.mjs';
 import {configureTableCreatorFixture,executeAndWaitForNode} from './helpers/table-fixture.mjs';
 
 // These are native acceptance tests: no fake gateway or model results.
-test('installed node discovery returns the real Table Creator factory and port metadata', async () => {
+test('installed node discovery returns the real Table Creator factory and port metadata', {skip:needsLive},async () => {
   const found = await nativeCall('core.nodes.search', {query: 'Table Creator', limit: 30}, 120000);
   const creator = found.nodes.find(n => n.name === 'Table Creator');
   assert.ok(creator, 'Installed Table Creator must be discoverable');
@@ -18,12 +19,12 @@ test('installed node discovery returns the real Table Creator factory and port m
   assert.equal(typeof detail.categoryPath, 'string');
 });
 
-test('live snapshot rejects a project that is not loaded instead of creating a second model', async () => {
+test('live snapshot rejects a project that is not loaded instead of creating a second model', {skip:needsLive},async () => {
   await assert.rejects(nativeCall('core.snapshot', {projectId: 'nonexistent-core-test-project'}),
     e => /project.*not.*(found|loaded)|unknown.*project/i.test(e.message));
 });
 
-test('core argument validation rejects malformed targets before even looking up a project', async () => {
+test('core argument validation rejects malformed targets before even looking up a project', {skip:needsLive},async () => {
   const projectId='nonexistent-argument-validation-project';
   for(const operation of ['core.execute','core.reset','core.cancel']) {
     for(const malformed of [{nodeID:'root:1'},{workflowID:'root:1'},{nodeId:null},{workflowId:null},{nodeId:1},{workflowId:[]}]) {
@@ -74,7 +75,7 @@ test('explicit nested workflow scope rejects a root node reference before settin
     }
   });
 
-test('core discovery supplies callable argument and typed patch contracts', async () => {
+test('core discovery supplies callable argument and typed patch contracts', {skip:needsLive},async () => {
   const description=await nativeCall('core.describe');
   const patch=description.contracts['core.settings.patch'].parameters;
   assert.ok(patch.required.includes('projectId'));

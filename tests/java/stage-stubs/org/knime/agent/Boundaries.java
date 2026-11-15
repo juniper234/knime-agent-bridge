@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.node.*;
 class ContextAccess {
     ContextAccess(JsonNode value){}Object bind(JsonNode args){return Map.of();}ObjectNode inspect(String id){return BridgeActivator.JSON.createObjectNode().set("revisions",BridgeActivator.JSON.createObjectNode());}
     Object usage(JsonNode a){return Map.of();}Object release(JsonNode a){return Map.of();}Object prune(JsonNode a){return Map.of();}
-    static class Conflict extends RuntimeException {final String code;final ObjectNode details=BridgeActivator.JSON.createObjectNode();Conflict(String code,String message){super(message);this.code=code;}}
+    static class Conflict extends RuntimeException {final String code;final JsonNode details;Conflict(String code,String message){this(code,message,BridgeActivator.JSON.createObjectNode());}Conflict(String code,String message,JsonNode details){super(message);this.code=code;this.details=details;}}
 }
 class CoreAccess {
     static volatile CountDownLatch entered=new CountDownLatch(1),release=new CountDownLatch(1);static volatile int effects;
@@ -31,11 +31,14 @@ class CoreAccess {
 }
 class GatewayAccess {
     static final List<String> SERVICES=List.of();static int initializations;GatewayAccess(){initializations++;}
+    /** Synthetic signatures: WorkflowService methods take projectId first; SpaceService methods take none. */
+    static int parameterIndex(String method,String parameter){return parameter.equals("projectId")&&method.startsWith("WorkflowService.")?0:-1;}
     Object describe(JsonNode a){return Map.of();}Object call(JsonNode a){return Map.of();}
     static class GatewayException extends Exception {final ObjectNode detail=BridgeActivator.JSON.createObjectNode();}
 }
 class OperationPolicy {
     static boolean mutation(String op,JsonNode args){return op.equals("core.reset")||op.equals("core.cancel");}
+    static java.util.List<String> readOperations(){return java.util.List.of("health");}static java.util.List<String> gatewayReadMethods(){return java.util.List.of();}
     static ObjectNode coverage(){return BridgeActivator.JSON.createObjectNode();}static String guardCoverage(String op,JsonNode args){return "synthetic";}
     static void enter(ContextAccess contexts,JsonNode precondition,String op,JsonNode args){if(!precondition.path("contextId").asText().equals("fixture"))throw new ContextAccess.Conflict("SCOPE","wrong scope");}
     static void leave(){}

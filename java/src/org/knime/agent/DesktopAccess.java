@@ -19,6 +19,7 @@ final class DesktopAccess {
             case "desktop.describe" -> describe();
             case "desktop.functions" -> functions();
             case "desktop.uiState" -> uiState();
+            case "desktop.selection" -> SelectionAccess.read();
             case "desktop.dialogAction", "desktop.dismissDialog" -> dismissDialog(args);
             case "desktop.openProject" -> openProject(args);
             case "desktop.saveProject" -> saveProject(args);
@@ -30,6 +31,7 @@ final class DesktopAccess {
         return Map.of("operations",List.of(
             Map.of("operation","desktop.describe","parameters",List.of(),"readOnly",true),
             Map.of("operation","desktop.functions","parameters",List.of(),"readOnly",true,"description","Lists installed callback names; only allowlisted operations can be invoked"),
+            Map.of("operation","desktop.selection","parameters",List.of(),"readOnly",true,"description","Nodes, annotations and connections selected on the canvas of the active workflow tab, read from KNIME internal UI state"),
             Map.of("operation","desktop.uiState","parameters",List.of(),"readOnly",true,"description","Bounded modal text, tree items and controlled acknowledgement actions with identity/fingerprint"),
             Map.of("operation","desktop.dialogAction","parameters",List.of(
                 Map.of("name","dialogId","type","string","required",true),Map.of("name","fingerprint","type","string","required",true),Map.of("name","actionId","type","string","required",true)),

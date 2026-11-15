@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { chromium } from 'playwright-core';
+import { launchRenderer } from './browser.mjs';
 import { createCanvasEvidence, LIMITS, sha256, validatePng, writeImmutableArtifact } from './evidence.mjs';
 import { flattenPath, intersectRects, validRect } from '../layout/geometry.mjs';
 
@@ -87,6 +87,19 @@ function tileManifest(bounds, scale, sourceFrameId) {
   return { tiles };
 }
 
+// Chrome can return a stale frame right after the viewport or SVG size changes, which
+// shows up as repeated labels with missing shapes. Page scripts are disabled, so frame
+// callbacks cannot be awaited; instead repeat the capture until two are byte-identical.
+export async function stableScreenshot(capture, attempts = 5) {
+  let previous = await capture();
+  for (let i = 1; i < attempts; i++) {
+    const next = await capture();
+    if (next.equals(previous)) return { data: next, stable: true };
+    previous = next;
+  }
+  return { data: previous, stable: false };
+}
+
 export async function renderSvg({ svg, context, sourceKind = 'native-preview', sourceFrameId = randomUUID(), freshness = 'model-stable-render-unconfirmed', outputDirectory, sourceArtifact, nativeLayout, omissions: initialOmissions = [], nativeCoverage, expectedFrameEvidence, options = {} }) {
   if (typeof svg !== 'string' || Buffer.byteLength(svg) > LIMITS.sourceBytes) throw new TypeError('SVG source exceeds the bounded source budget.');
   if (!context?.contextId) throw new TypeError('A bound canvas context is required.');
@@ -96,7 +109,7 @@ export async function renderSvg({ svg, context, sourceKind = 'native-preview', s
   if (scale !== undefined && (!Number.isFinite(scale) || scale <= 0 || scale > 8)) throw new TypeError('Scale must be in (0,8].');
   if (![1, 2, 3].includes(deviceScaleFactor) || !Number.isSafeInteger(maxImages) || maxImages < 1 || maxImages > LIMITS.maxImages || !Number.isSafeInteger(tileOffset) || tileOffset < 0) throw new TypeError('Invalid render image budget, tile offset or device scale.');
   if (crop && (!validRect(crop) || crop.width <= 0 || crop.height <= 0)) throw new TypeError('A positive workflow crop is required.');
-  const omissions = structuredClone(initialOmissions), browser = await chromium.launch({ channel: 'msedge', headless: true, args: ['--disable-background-networking', '--disable-component-update', '--disable-sync', '--disable-extensions', '--no-first-run'] });
+  const omissions = structuredClone(initialOmissions), { browser, name: rendererName } = await launchRenderer();
   try {
     if (expectedFrameEvidence && expectedFrameEvidence.renderer.version !== browser.version()) { const error = new Error('Source-frame replay requires the original renderer version.'); error.code = 'RENDER_MISMATCH'; throw error; }
     const isolated = await browser.newContext({ javaScriptEnabled: false, serviceWorkers: 'block', deviceScaleFactor, viewport: { width: 1600, height: 1200 } });
@@ -167,7 +180,8 @@ export async function renderSvg({ svg, context, sourceKind = 'native-preview', s
       if (width * height > LIMITS.imagePixels || width > 8192 || height > 8192) { omissions.push({ kind: 'image-pixel-budget-exceeded', artifactId: tile.artifactId, requiredCrop: tile.crop }); continue; }
       await page.setViewportSize({ width: Math.ceil(width / deviceScaleFactor), height: Math.ceil(height / deviceScaleFactor) });
       await page.evaluate(({ crop, width, height, dsf }) => { const root = document.querySelector('body > svg'); root.setAttribute('viewBox', `${crop.x} ${crop.y} ${crop.width} ${crop.height}`); root.setAttribute('width', width / dsf); root.setAttribute('height', height / dsf); }, { crop: tile.crop, width, height, dsf: deviceScaleFactor });
-      const data = await page.screenshot({ type: 'png', clip: { x: 0, y: 0, width: width / deviceScaleFactor, height: height / deviceScaleFactor }, animations: 'disabled', timeout: 15000 });
+      const { data, stable } = await stableScreenshot(() => page.screenshot({ type: 'png', clip: { x: 0, y: 0, width: width / deviceScaleFactor, height: height / deviceScaleFactor }, animations: 'disabled', timeout: 15000 }));
+      if (!stable) omissions.push({ kind: 'render-unstable', artifactId: tile.artifactId });
       if (data.length > LIMITS.imageBytes || encodedBytes + Math.ceil(data.length / 3) * 4 > LIMITS.toolBytes - 256 * 1024) { omissions.push({ kind: 'image-byte-budget-exceeded', artifactId: tile.artifactId, requiredCrop: tile.crop }); continue; }
       const actual = validatePng(data), sx = actual.width / tile.crop.width, sy = actual.height / tile.crop.height;
       artifacts.push({ artifactId: tile.artifactId, sourceFrameId, mimeType: 'image/png', bytes: data.length, sha256: sha256(data), width: actual.width, height: actual.height, role: tile.role, cropWorkflowBounds: tile.crop, workflowToPixel: [sx, 0, 0, sy, -tile.crop.x * sx, -tile.crop.y * sy], hostDownsampling: 'unknown' });
@@ -175,7 +189,7 @@ export async function renderSvg({ svg, context, sourceKind = 'native-preview', s
     }
     const requiredTileIds = required.map(t => t.artifactId), omittedTileIds = requiredTileIds.filter(id => !artifacts.some(a => a.artifactId === id));
     const coverageGaps = [...geometry.coverage.gaps, ...(nativeCoverage?.complete === false ? [{ kind: 'native-provider-coverage-incomplete', details: nativeCoverage }] : []), ...(crop ? [{ kind: 'partial-crop', fullWorkflowBounds: fullBounds }] : [])];
-    const evidence = createCanvasEvidence({ contextId: context.contextId, sessionId: context.sessionId, scopeId: context.workflowId || context.scopeId || 'root', revisions: context.revisions, layoutRevision: context.revisions?.layout || context.layoutRevision || 'unknown', executionRevision: context.revisions?.execution || context.executionRevision || 'unknown', sourceFrameId, sourceKind, freshness: sourceKind === 'saved-preview' ? 'saved-only' : freshness, renderer: { name: 'Microsoft Edge / Playwright', version: browser.version(), fontsReady: fontsReady && geometry.fonts.every(f => f.status === 'loaded'), deviceScaleFactor, sourceScriptsEnabled: false, externalResourcesEnabled: false }, renderParameters, coverage: { bounds, fullWorkflowBounds: fullBounds, extent: crop ? 'crop' : 'full', requiredTileIds, requiredTiles: required.map(t => ({ artifactId: t.artifactId, cropWorkflowBounds: t.crop, scale: t.scale })), omittedTileIds, omittedObjectIds: [], gaps: coverageGaps, resourcesComplete: !omissions.length && fontsReady && geometry.fonts.every(f => f.status === 'loaded'), geometryComplete: !coverageGaps.length, complete: !omittedTileIds.length && !omissions.length && !coverageGaps.length && !manifest.gap }, artifacts, omissions, ...(sourceArtifact ? { sourceArtifact } : {}), ...(nativeLayout ? { nativeLayout } : {}), delivery: { serverEmittedArtifactIds: [], hostDelivery: 'unconfirmed', hostDownsampling: 'unknown' } });
+    const evidence = createCanvasEvidence({ contextId: context.contextId, sessionId: context.sessionId, scopeId: context.workflowId || context.scopeId || 'root', revisions: context.revisions, layoutRevision: context.revisions?.layout || context.layoutRevision || 'unknown', executionRevision: context.revisions?.execution || context.executionRevision || 'unknown', sourceFrameId, sourceKind, freshness: sourceKind === 'saved-preview' ? 'saved-only' : freshness, renderer: { name: rendererName, version: browser.version(), fontsReady: fontsReady && geometry.fonts.every(f => f.status === 'loaded'), deviceScaleFactor, sourceScriptsEnabled: false, externalResourcesEnabled: false }, renderParameters, coverage: { bounds, fullWorkflowBounds: fullBounds, extent: crop ? 'crop' : 'full', requiredTileIds, requiredTiles: required.map(t => ({ artifactId: t.artifactId, cropWorkflowBounds: t.crop, scale: t.scale })), omittedTileIds, omittedObjectIds: [], gaps: coverageGaps, resourcesComplete: !omissions.length && fontsReady && geometry.fonts.every(f => f.status === 'loaded'), geometryComplete: !coverageGaps.length, complete: !omittedTileIds.length && !omissions.length && !coverageGaps.length && !manifest.gap }, artifacts, omissions, ...(sourceArtifact ? { sourceArtifact } : {}), ...(nativeLayout ? { nativeLayout } : {}), delivery: { serverEmittedArtifactIds: [], hostDelivery: 'unconfirmed', hostDownsampling: 'unknown' } });
     Object.assign(geometry, { evidenceId: evidence.evidenceId, contextId: evidence.contextId, scopeId: evidence.scopeId, layoutRevision: evidence.layoutRevision });
     if (outputDirectory) {
       await mkdir(outputDirectory, { recursive: true });

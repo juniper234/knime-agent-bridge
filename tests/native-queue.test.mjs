@@ -1,11 +1,12 @@
 import test from 'node:test';
+import {needsLive} from './helpers/requirements.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {BridgeClient} from '../src/client.mjs';
 
-test('an expired queued mutation is rejected before KNIME creates a workflow',async()=>{
+test('an expired queued mutation is rejected before KNIME creates a workflow',{skip:needsLive},async()=>{
  const client=new BridgeClient();const session=await client.selectSession();
  const id=randomUUID(),name='EXPIRED-'+id;
  const directory=path.join(client.runtime,'sessions',session.id);

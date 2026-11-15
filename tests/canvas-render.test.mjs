@@ -67,3 +67,19 @@ test('image evidence rejects invalid transforms, payload dimensions and lying co
   const incomplete = structuredClone(valid.evidence); incomplete.coverage.requiredTileIds.push('missing'); incomplete.coverage.complete = true;
   assert.throws(() => evidenceApi.validateCanvasEvidence(incomplete), /coverage/i);
 });
+
+test('screenshots repeat until two captures match, so a stale first frame is discarded', async () => {
+  const frames = [Buffer.from('stale'), Buffer.from('fresh'), Buffer.from('fresh')];
+  let calls = 0;
+  const result = await renderer.stableScreenshot(async () => frames[calls++]);
+  assert.equal(calls, 3);
+  assert.equal(result.stable, true);
+  assert.equal(result.data.toString(), 'fresh');
+});
+
+test('a capture that never settles is returned but marked unstable', async () => {
+  let calls = 0;
+  const result = await renderer.stableScreenshot(async () => Buffer.from('frame' + calls++), 4);
+  assert.equal(calls, 4);
+  assert.equal(result.stable, false);
+});

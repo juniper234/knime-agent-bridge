@@ -89,6 +89,12 @@ export const toolCatalog = [
     run: (client, { session, timeoutMs, ...args }) => client.call('core.snapshot', args, { session, timeoutMs }),
   },
   {
+    name: 'knime_selection', title: 'See what the user selected in KNIME',
+    description: 'Return the nodes, annotations and connections the user currently has selected on the canvas of the active workflow tab, with node names, factories and states plus the projectId/workflowId/nodeId to pass to other tools. Use it when the user says "this node" or "the selected nodes". Read from KNIME internal UI state: it reflects the moment of the call, can be empty, and a KNIME update may make it unavailable.',
+    inputSchema: { session, timeoutMs }, annotations: { ...readOnly, idempotentHint: false },
+    run: readSelection,
+  },
+  {
     name: 'knime_settings', title: 'Read typed node settings',
     description: 'Read core.settings.get for one node, component or metanode in a loaded project. Returns the typed settings envelope and current node state without patching configuration. Preserve the envelope and native type names when reasoning about a later authorized settings change; supported fields depend on the actual node and its input data.',
     inputSchema: { projectId, nodeId, workflowId, session, timeoutMs }, annotations: readOnly,
@@ -126,7 +132,7 @@ export const toolCatalog = [
   },
   {
     name: 'knime_desktop_call', title: 'Control the visible KNIME editor',
-    description: 'Discover and invoke supported KNIME desktop actions. Start with operation desktop.describe and args {}. For desktop.openProject provide the discovered spaceProviderId, spaceId and itemId so the project opens in the actual KNIME editor. Other operations depend on the installed bridge catalogue. This changes the visible application; select the correct session and use it only for the requested workflow. Timeout means unknown outcome: inspect application state before retrying.',
+    description: 'Discover and invoke supported KNIME desktop actions. Start with operation desktop.describe and args {}. For desktop.openProject provide the discovered spaceProviderId, spaceId and itemId so the project opens in the actual KNIME editor. When knime_health reports scope.openWorkflowsOnly, opening and SpaceService calls are refused with SCOPE_RESTRICTED: ask the user to open the workflow instead. Other operations depend on the installed bridge catalogue. This changes the visible application; select the correct session and use it only for the requested workflow. Timeout means unknown outcome: inspect application state before retrying.',
     inputSchema: { operation: z.string().min(1).describe('Supported full desktop operation name, starting desktop.'), args: z.record(z.unknown()).default({}).describe('Named JSON arguments documented by desktop.describe.'), session, timeoutMs, precondition, operationId }, annotations: advanced,
     run: (client, { operation, args = {}, ...options }) => {
       if (!/^desktop\.[A-Za-z][A-Za-z0-9_.]*$/.test(operation)) throw new BridgeError('INVALID_ARGUMENT', 'Desktop operation must begin with desktop. and name a supported desktop action.');
@@ -156,7 +162,7 @@ export const operationGuide = {
   ],
   fullContext: [
     'Default MCP text is concise; structuredContent remains complete below the 128 KiB threshold. Large payloads return immutable detail references. Fetch knime_detail chunks, concatenate exact text and verify its full UTF-8 SHA-256. resultMode:"full" explicitly requests the whole structured payload. Page knime_history metadata with the same kind/baseDigest; a stale cursor must restart rather than merge unknown state.',
-    'Read application state to establish open projects, the active project and available actions. Use the discovered desktop.openProject action when the workflow needs to be visible in the editor.',
+    'Read application state to establish open projects, the active project and available actions. Use the discovered desktop.openProject action when the workflow needs to be visible in the editor. If knime_health reports scope.openWorkflowsOnly, work only with projects listed in openProjects and ask the user to open any other workflow.',
     'Use read-only knime_workflow for the selected project to inspect node IDs, factory/types, labels, positions, state, connections, annotations, errors and permitted actions. Include components and metanodes by traversing nested workflow IDs within a deliberate depth limit and inspect truncation fields.',
     'Use read-only knime_settings for typed settings and knime_table for bounded output table pages. Use the native port indices from knime_workflow. Preserve missing values separately from empty strings, decimal-string long values and nextOffset, and inspect reported truncation/continuation. Avoid passwords and secrets in routine snapshots.',
     'Use read-only knime_nodes to search the installed active node catalogue before adding a node. Configuration support depends on the actual node implementation; report unsupported or opaque settings instead of inventing them.',
@@ -180,6 +186,26 @@ export const operationGuide = {
   ],
   limits: 'KNIME gateway APIs are internal and version-specific. A discoverable method is not evidence every node family or third-party extension has been verified. Use the packaged capability matrix for beta acceptance evidence.',
 };
+
+// Selection IDs are gateway IDs; the snapshot adds names and native IDs. Naming is best effort:
+// the selection itself is still returned when the snapshot cannot be read.
+export async function readSelection(client, { session, timeoutMs } = {}) {
+  const selection = await client.call('desktop.selection', {}, { session, timeoutMs });
+  if (!selection?.available || !selection.projectId || !selection.nodeIds?.length) return selection;
+  try {
+    const args = { projectId: selection.projectId, depth: 0, ...(selection.workflowId && selection.workflowId !== 'root' ? { workflowId: selection.workflowId } : {}) };
+    const snapshot = await client.call('core.snapshot', args, { session, timeoutMs });
+    const byGateway = new Map((snapshot.nodes ?? []).map(node => [node.gatewayId ?? node.id, node]));
+    const nodes = selection.nodeIds.map(id => {
+      const node = byGateway.get(id);
+      return node ? { nodeId: id, nativeId: node.id, name: node.name, customName: node.customName ?? null, kind: node.kind, factoryId: node.factoryId ?? null, state: node.state }
+        : { nodeId: id, found: false };
+    });
+    return { ...selection, nodes };
+  } catch (error) {
+    return { ...selection, nodes: null, namingError: { code: error?.code ?? 'UNKNOWN', message: String(error?.message ?? error).slice(0, 300) } };
+  }
+}
 
 export async function dispatchTool(client, name, input = {}) {
   const tool = toolCatalog.find(item => item.name === name);
@@ -209,6 +235,7 @@ export function errorPayload(error) {
     /CONTEXT|REVISION/.test(payload.code)?{tool:'knime_context',arguments:{action:'inspect',contextId:'<existing bound context>'}}:
     /SESSION|RUNTIME|PROFILE|COMPATIBILITY/.test(payload.code)?{tool:'knime_connection',arguments:{detail:true}}:
     payload.code==='STALE_HISTORY_CURSOR'?{tool:'knime_history',arguments:{action:'page'}}:
+    payload.code==='WRITES_DISABLED'||payload.code==='SCOPE_RESTRICTED'?{tool:'knime_health',arguments:{}}:
     payload.code==='INVALID_ARGUMENT'?{tool:'knime_core_call',arguments:{operation:'core.describe',args:{}}}:null;
   return {error:{...payload,...(next?{suggestedReadOnlyNextCall:next}:{})}};
 }

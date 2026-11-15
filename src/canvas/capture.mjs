@@ -10,8 +10,15 @@ function sameTarget(expected, actual) {
   if (!actual || ['contextId', 'sessionId', 'projectId', 'workflowId'].some(k => expected[k] !== actual[k])) throw new BridgeError('CONTEXT_CHANGED', 'Capture target changed; bind the intended session, project and scope again.');
 }
 
+/** KNIME_AGENT_CANVAS: unset or empty means on; false/0/no/off turns canvas images off. */
+export function canvasEnabled(env = process.env) {
+  const value = env.KNIME_AGENT_CANVAS;
+  return value === undefined || value.trim() === '' || !/^(false|0|no|off)$/i.test(value.trim());
+}
+
 /** Captures only the bound native target. Saved artifacts retain saved-only provenance. */
 export async function captureCanvas({ client, context, artifactDirectory, mode = 'overview', crop, scale, reuseEvidence, options = {} }) {
+  if (!canvasEnabled(options.env)) throw new BridgeError('CANVAS_DISABLED', 'Canvas images are turned off for this agent connection, so no browser was started and nothing was sent to KNIME. The user can enable "Canvas images" in the KNIME Agent Bridge extension settings (or set KNIME_AGENT_CANVAS=true). Workflow structure is still available from knime_workflow.', { nativeDispatch: 'not_started' });
   if (!client?.call || !context?.contextId || !context.sessionId || !artifactDirectory) throw new BridgeError('INVALID_ARGUMENT', 'Capture requires client, bound session context and its artifact directory.');
   const retries = options.retries ?? 1;
   if (![0, 1].includes(retries)) throw new BridgeError('INVALID_ARGUMENT', 'At most one capture retry is permitted.');

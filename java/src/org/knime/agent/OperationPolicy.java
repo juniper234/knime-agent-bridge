@@ -8,13 +8,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 final class OperationPolicy {
     private static final Set<String> READS=Set.of("health","bridge.diagnostics","context.bind","context.inspect","context.usage","context.release","context.prune","dependency.inspect","operation.get","canvas.preview","canvas.viewport","canvas.capabilities",
         "gateway.describe","core.describe","core.snapshot","core.settings.get","core.settings.preview","core.table.read","core.port.inspect","core.nodes.search","core.nodes.details",
-        "desktop.describe","desktop.functions","desktop.uiState");
+        "desktop.describe","desktop.functions","desktop.uiState","desktop.selection");
     private static final Set<String> GATEWAY_READS=Set.of("ApplicationService.getState","WorkflowService.getWorkflow","WorkflowService.getWorkflowMonitorState",
         "WorkflowService.getNode","WorkflowService.getWorkflowInfo","WorkflowService.getWorkflowPortInfo","WorkflowService.getWorkflowBounds",
         "SpaceService.listWorkflowGroup","SpaceService.getSpaceItem","SpaceService.getSpaces","SpaceService.getSpaceProviders",
         "NodeRepositoryService.getNodeRepository","NodeRepositoryService.searchNodes","NodeRepositoryService.getNodeDescription");
     record Guard(ContextAccess contexts,JsonNode precondition,String operation,JsonNode args){}
     private static final ThreadLocal<Guard> CURRENT=new ThreadLocal<>();
+    static List<String> readOperations(){return READS.stream().sorted().toList();}
+    static List<String> gatewayReadMethods(){return GATEWAY_READS.stream().sorted().toList();}
     static boolean mutation(String op,JsonNode args){return !READS.contains(op)&&!(op.equals("gateway.call")&&GATEWAY_READS.contains(args.path("method").asText()));}
     static String guardCoverage(String op,JsonNode args) {
         if(Set.of("core.settings.patch","core.execute","core.reset","layout.apply","core.port.export","core.workflow.export").contains(op))return "apply-time";

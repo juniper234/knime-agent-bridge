@@ -14,7 +14,8 @@ import org.eclipse.ui.PlatformUI;
 /** A local, per-process command queue. No sockets, account tokens, or remote services. */
 public final class BridgeActivator implements BundleActivator {
     static final ObjectMapper JSON = new ObjectMapper().enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
-    static final String VERSION = "0.5.0";
+    /** major.minor.micro of this bundle; matches package.json of the Node server. */
+    static volatile String version="unknown";
     private final String id = UUID.randomUUID().toString();
     private final String startedAt = Instant.now().toString();
     private ScheduledExecutorService heartbeat;
@@ -31,9 +32,8 @@ public final class BridgeActivator implements BundleActivator {
     private volatile String problem;
 
     @Override public void start(BundleContext context) throws Exception {
-        String root=System.getProperty("knime.agent.runtime");
-        if(root==null || root.isBlank()) root=Path.of(System.getProperty("user.home"),".knime-agent","runtime").toString();
-        session=Path.of(root).toAbsolutePath().resolve("sessions").resolve(id);
+        version=bridgeVersion(context.getBundle().getVersion());
+        session=RuntimeDirectory.resolve().resolve("sessions").resolve(id);
         Files.createDirectories(session.resolve("requests"));
         Files.createDirectories(session.resolve("responses"));
         Files.createDirectories(session.resolve("inflight"));
@@ -42,7 +42,7 @@ public final class BridgeActivator implements BundleActivator {
             if(!Files.isRegularFile(loaded))throw new IllegalStateException("Running bridge bundle is not a JAR");
             bundleFingerprint=RevisionTracker.bytesDigest(Files.readAllBytes(loaded));
         } catch(Exception e) {problem="Loaded JAR fingerprint unavailable: "+e.getClass().getSimpleName()+"; bundle="+context.getBundle().getLocation();}
-        capabilityFingerprint=RevisionTracker.digest(JSON.valueToTree(Map.of("version",VERSION,"policies",OperationPolicy.coverage(),"canvas",CanvasAccess.capabilities())));
+        capabilityFingerprint=RevisionTracker.digest(JSON.valueToTree(Map.of("version",version,"policies",OperationPolicy.coverage(),"canvas",CanvasAccess.capabilities())));
         contexts=new ContextAccess(metadata("starting"));
         operations=new OperationAccess(session,id);canvas=new CanvasAccess(contexts,new ArtifactStore(session));
         jobs=new ThreadPoolExecutor(1,1,0L,TimeUnit.MILLISECONDS,new ArrayBlockingQueue<>(64),r->{Thread t=new Thread(r,"knime-agent-native-jobs");t.setDaemon(true);return t;});
@@ -55,11 +55,13 @@ public final class BridgeActivator implements BundleActivator {
         requests.scheduleWithFixedDelay(this::poll,0,50,TimeUnit.MILLISECONDS);
     }
 
+    static String bridgeVersion(Version bundle){return bundle.getMajor()+"."+bundle.getMinor()+"."+bundle.getMicro();}
+
     private ObjectNode metadata(String status) {
         ObjectNode m=JSON.createObjectNode();
-        m.put("id",id);m.put("pid",ProcessHandle.current().pid());m.put("bridgeVersion",VERSION);
+        m.put("id",id);m.put("pid",ProcessHandle.current().pid());m.put("bridgeVersion",version);
         m.put("bundleFingerprint",bundleFingerprint).put("capabilityFingerprint",capabilityFingerprint);
-        m.set("operationPolicies",OperationPolicy.coverage());m.set("canvasCapabilities",JSON.valueToTree(CanvasAccess.capabilities()));
+        m.set("operationPolicies",OperationPolicy.coverage());m.set("writePolicy",writePolicy());m.set("scopePolicy",ScopePolicy.describe());m.set("canvasCapabilities",JSON.valueToTree(CanvasAccess.capabilities()));
         Bundle core=Platform.getBundle("org.knime.core");
         m.put("knimeVersion",core==null?"unknown":core.getVersion().toString());
         m.put("workspace",Platform.getInstanceLocation().getURL().toString());
@@ -96,6 +98,8 @@ public final class BridgeActivator implements BundleActivator {
             telemetry.read(requestId,operation,Files.size(claimed));
             if(!args.isObject())throw new IllegalArgumentException("args must be an object");
             if(!ready&&!safeRead(operation))throw new ContextAccess.Conflict("NATIVE_NOT_READY","Native dependencies are not ready; no operation was dispatched");
+            if(OperationPolicy.mutation(operation,args))requireWrites(operation,args);
+            ScopePolicy.require(operation,args,RuntimeDirectory.resolve());
             boolean tracked=!safeRead(operation)&&(OperationPolicy.mutation(operation,args)||operation.equals("canvas.preview")||operation.equals("canvas.viewport"));
             if(tracked) {
                 ObjectNode previous=operations.existing(requestId,request);
@@ -116,6 +120,21 @@ public final class BridgeActivator implements BundleActivator {
             }
         }
         publish(claimed,response,originalTelemetry);
+    }
+    /** Refuses before acceptance: no receipt is written and nothing reaches KNIME. */
+    private static void requireWrites(String operation,JsonNode args) {
+        WritePolicy.State policy=WritePolicy.current();
+        if(policy.enabled())return;
+        ObjectNode details=JSON.createObjectNode().put("operation",operation).put("writePolicySource",policy.source()).put("enableAt",WritePolicy.WHERE);
+        if(operation.equals("gateway.call"))details.put("method",args.path("method").asText());
+        throw new ContextAccess.Conflict("WRITES_DISABLED","Agent changes are turned off in this KNIME. Read operations still work; a user can allow changes again in "+WritePolicy.WHERE+".",details);
+    }
+    static ObjectNode writePolicy() {
+        WritePolicy.State policy=WritePolicy.current();
+        ObjectNode out=JSON.createObjectNode().put("enabled",policy.enabled()).put("source",policy.source());
+        out.set("readOperations",JSON.valueToTree(OperationPolicy.readOperations()));
+        out.set("gatewayReadMethods",JSON.valueToTree(OperationPolicy.gatewayReadMethods()));
+        return out;
     }
     private static boolean safeRead(String operation){return Set.of("health","operation.get","bridge.diagnostics").contains(operation);}
     private void executeControl(Path claimed,JsonNode request,ObjectNode response) {

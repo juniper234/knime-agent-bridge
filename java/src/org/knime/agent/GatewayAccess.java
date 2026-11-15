@@ -38,6 +38,23 @@ final class GatewayAccess {
         return Collections.unmodifiableMap(result);
     }
 
+    /** Position of the named @JsonRpcParam of Service.method, or -1 when the method or parameter is unknown. */
+    static int parameterIndex(String name,String parameter) {
+        int separator=name.indexOf('.');
+        Class<? extends GatewayService> api=separator<0?null:INTERFACES.get(name.substring(0,separator));
+        if(api==null)return -1;
+        String method=name.substring(separator+1);
+        for(Method m:methods(api)) {
+            if(!rpcName(m).equals(method))continue;
+            Parameter[] parameters=m.getParameters();
+            for(int i=0;i<parameters.length;i++) {
+                JsonRpcParam annotation=parameters[i].getAnnotation(JsonRpcParam.class);
+                if(annotation!=null&&annotation.value().equals(parameter))return i;
+            }
+        }
+        return -1;
+    }
+
     synchronized JsonNode call(JsonNode args) throws Exception {
         String name=args.path("method").asText();
         int separator=name.indexOf('.');

@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {needsLive} from './helpers/requirements.mjs';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import fs from 'node:fs/promises';
@@ -9,7 +10,7 @@ import {guardedMcp} from './helpers/guarded-native.mjs';
 
 // Every operation here crosses the real MCP stdio connection and the live Java
 // bridge. The test only creates its own disposable workflow in the beta workspace.
-test('MCP creates, configures, edits, executes, inspects and persists a real KNIME workflow', {timeout:180000}, async()=>{
+test('MCP creates, configures, edits, executes, inspects and persists a real KNIME workflow', {skip:needsLive,timeout:180000}, async()=>{
  const client=new Client({name:'knime-native-beta-test',version:'0.1.0'});
  const transport=new StdioClientTransport({command:process.execPath,args:[path.resolve('src/server.mjs'),'--runtime',process.env.KNIME_AGENT_RUNTIME||path.resolve('runtime')],stderr:'pipe'});
  await client.connect(transport);

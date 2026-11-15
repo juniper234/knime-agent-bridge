@@ -15,6 +15,8 @@ final class OperationPolicy {
         "NodeRepositoryService.getNodeRepository","NodeRepositoryService.searchNodes","NodeRepositoryService.getNodeDescription");
     record Guard(ContextAccess contexts,JsonNode precondition,String operation,JsonNode args){}
     private static final ThreadLocal<Guard> CURRENT=new ThreadLocal<>();
+    static List<String> readOperations(){return READS.stream().sorted().toList();}
+    static List<String> gatewayReadMethods(){return GATEWAY_READS.stream().sorted().toList();}
     static boolean mutation(String op,JsonNode args){return !READS.contains(op)&&!(op.equals("gateway.call")&&GATEWAY_READS.contains(args.path("method").asText()));}
     static String guardCoverage(String op,JsonNode args) {
         if(Set.of("core.settings.patch","core.execute","core.reset","layout.apply","core.port.export","core.workflow.export").contains(op))return "apply-time";

@@ -72,3 +72,13 @@ test('immutable source paging reuses sourceFrame and stable required tile IDs wi
     await assert.rejects(captureCanvas({ client: staleClient, context: ctx, artifactDirectory: dir, mode: 'tiles', reuseEvidence: first.evidence }), error => error.code === 'REVISION_CONFLICT');
   });
 });
+
+test('canvas switch refuses capture before any native call or browser launch', async () => {
+  const { captureCanvas, canvasEnabled } = await import('../src/canvas/capture.mjs');
+  assert.equal(canvasEnabled({}), true);
+  assert.equal(canvasEnabled({ KNIME_AGENT_CANVAS: 'false' }), false);
+  let calls = 0;
+  const client = { call: async () => { calls++; return {}; } };
+  await assert.rejects(captureCanvas({ client, context: { contextId: 'c', sessionId: 's' }, artifactDirectory: '/nonexistent', options: { env: { KNIME_AGENT_CANVAS: 'false' } } }), error => error.code === 'CANVAS_DISABLED' && error.details.nativeDispatch === 'not_started');
+  assert.equal(calls, 0);
+});

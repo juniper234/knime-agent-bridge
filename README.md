@@ -8,6 +8,8 @@ Inspect workflows and node settings, edit native graphs, run nodes, read outputs
 
 v0.5 provides **25 MCP tools**, explicit pinned connection profiles, native queue/stage diagnostics, owned stdio lifecycle receipts, separate observer/operation deadlines, compact results with complete detail retrieval, async evidence history and complete keyed table verification with named binary metrics. Named scalar/path checks help detect inherited paths in copied workflows. It preserves v0.4 context lifecycle, typed settings preflight, deduplication, revision guards and original-UUID recovery. Native graph editing, execution and canvas previews remain available.
 
+v0.6 installs as a KNIME extension (`docs/INSTALL.md`). KNIME preferences can block agent changes and, by default, limit agents to the workflows open in KNIME.
+
 The reported desktop lag cause remains unknown. These changes improve diagnosis and measured Node responsiveness; they do not certify faster training or fresh model inference. Read [v0.5 verification and remaining limits](docs/VERIFICATION-0.5.md).
 
 ## Get started

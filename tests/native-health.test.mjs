@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {needsLive} from './helpers/requirements.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -39,7 +40,7 @@ export async function nativeCall(operation, args = {}, timeoutMs = 30000) {
   throw new Error('Native KNIME call timed out: '+operation);
 }
 
-test('bridge attaches to real KNIME 5.12 and discovers its live workflow service', async()=>{
+test('bridge attaches to real KNIME 5.12 and discovers its live workflow service', {skip:needsLive},async()=>{
   const health=await nativeCall('health');
   assert.match(health.knimeVersion,/^5\.12\./);
   assert.ok(health.services.includes('WorkflowService'));

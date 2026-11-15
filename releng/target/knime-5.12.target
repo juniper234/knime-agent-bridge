@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?>
+<!--
+  Build target for KNIME Analytics Platform 5.12.0 (LTS).
+  The versioned 5.12.0 site is immutable, so builds are reproducible.
+  To support a new KNIME release, copy this file, change the repository URL,
+  and rebuild.
+-->
+<target name="knime-5.12.0" sequenceNumber="1">
+  <locations>
+    <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="false" type="InstallableUnit">
+      <repository location="https://update.knime.com/analytics-platform/lts/5.12/5.12.0"/>
+      <unit id="org.eclipse.core.runtime" version="0.0.0"/>
+      <unit id="org.eclipse.equinox.common" version="0.0.0"/>
+      <unit id="org.eclipse.osgi" version="0.0.0"/>
+      <unit id="org.eclipse.ui.workbench" version="0.0.0"/>
+      <unit id="org.eclipse.jface" version="0.0.0"/>
+      <unit id="org.eclipse.swt" version="0.0.0"/>
+      <unit id="org.knime.core" version="0.0.0"/>
+      <unit id="org.knime.core.util" version="0.0.0"/>
+      <unit id="org.knime.shared.workflow.def" version="0.0.0"/>
+      <unit id="org.knime.gateway.api" version="0.0.0"/>
+      <unit id="org.knime.gateway.impl" version="0.0.0"/>
+      <unit id="org.knime.gateway.impl.jsonrpc" version="0.0.0"/>
+      <unit id="org.knime.gateway.json" version="0.0.0"/>
+      <unit id="org.knime.ui.java" version="0.0.0"/>
+      <unit id="com.github.briandilley.jsonrpc4j" version="0.0.0"/>
+      <unit id="com.fasterxml.jackson.core.jackson-databind" version="0.0.0"/>
+      <unit id="com.fasterxml.jackson.core.jackson-core" version="0.0.0"/>
+      <unit id="com.fasterxml.jackson.core.jackson-annotations" version="0.0.0"/>
+      <unit id="org.apache.commons.lang3" version="0.0.0"/>
+      <unit id="com.sun.jna" version="0.0.0"/>
+      <unit id="com.sun.jna.platform" version="0.0.0"/>
+    </location>
+  </locations>
+</target>

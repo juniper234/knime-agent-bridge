@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature id="io.github.juniper234.knime.agentbridge.feature">
+      <category name="agent-bridge"/>
+   </feature>
+   <category-def name="agent-bridge" label="KNIME Agent Bridge (community)">
+      <description>Local bridge between KNIME Analytics Platform and AI agents. Not made by KNIME AG.</description>
+   </category-def>
+</site>

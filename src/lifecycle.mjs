@@ -11,6 +11,12 @@ export async function processIdentities() {
    const script=`$ErrorActionPreference='Stop'; @(${pids.join(',')}) | ForEach-Object { $p=Get-Process -Id $_; [pscustomobject]@{pid=$p.Id;creationIdentity=$p.StartTime.ToUniversalTime().ToFileTimeUtc().ToString();creationIdentitySource='windows_process_start_filetime'} } | ConvertTo-Json -Compress`;
    const {stdout}=await execute('powershell.exe',['-NoProfile','-NonInteractive','-Command',script],{windowsHide:true,timeout:3000,maxBuffer:4096});return JSON.parse(stdout);
   }
+  if(process.platform==='darwin') {
+   // macOS has no /proc. ps reports the start time to the second; combined with the pid that is a usable identity.
+   const {stdout}=await execute('ps',['-o','pid=,lstart=','-p',pids.join(',')],{timeout:3000,maxBuffer:4096});
+   const started=new Map(stdout.split('\n').map(line=>line.trim().match(/^(\d+)\s+(.+)$/)).filter(Boolean).map(([,pid,start])=>[Number(pid),start.replace(/\s+/g,' ')]));
+   return pids.map(pid=>started.has(pid)?{pid,creationIdentity:started.get(pid),creationIdentitySource:'darwin_ps_lstart'}:{pid,creationIdentity:null,creationIdentitySource:'unknown',reason:'PROCESS_NOT_FOUND'});
+  }
   return await Promise.all(pids.map(async pid=>{const raw=await readFile(`/proc/${pid}/stat`,'utf8');return {pid,creationIdentity:raw.slice(raw.lastIndexOf(')')+2).split(' ')[19],creationIdentitySource:'linux_proc_start_ticks'};}));
  }catch(error){return pids.map(pid=>({pid,creationIdentity:null,creationIdentitySource:'unknown',reason:error.code??'IDENTITY_UNAVAILABLE'}));}
 }

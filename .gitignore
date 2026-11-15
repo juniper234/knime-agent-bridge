@@ -1,6 +1,6 @@
 node_modules/
 build/
-runtime/
+/runtime/
 research/
 .superpowers/
 *.log
@@ -9,3 +9,7 @@ research/
 artifacts/*.jar
 artifacts/*.zip
 artifacts/*.sha256
+target/
+# The Tycho target definition lives in releng/target and must be committed.
+!releng/target/
+.DS_Store
